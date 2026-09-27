@@ -3,7 +3,7 @@ export type Attribute = 'ninjutsu' | 'taijutsu' | 'genjutsu' | 'intelligence' | 
 export type Rank = 'Academy' | 'Genin' | 'Chuunin' | 'Jounin' | 'Retired' | 'Fallen';
 export type MissionRank = 'E' | 'D' | 'C' | 'B' | 'A' | 'S';
 export type Jutsu = { id: string; name: string; tags: Tag[]; chakraCost: number; mastery: number; description: string; minimumRank?: MissionRank; requires?: string[]; specialization?: string; bloodline?: string };
-export type Content = { schemaVersion: 1; jutsu: Jutsu[]; specializations: { id: string; name: string; unlock: string; description: string }[]; bloodlines: { id: string; name: string; assetSlot?: string; hook: string }[]; summons: { id: string; name: string; assetSlot?: string; terms: string }[]; bijuu: { id: string; name: string; temperament: string; assetSlot?: string }[] };
+export type Content = { schemaVersion: 1; jutsu: Jutsu[]; specializations: { id: string; name: string; unlock: string; description: string }[]; bloodlines: { id: string; name: string; assetSlot?: string; hook: string }[]; dojutsu: { id: string; name: string; assetSlot?: string; hook: string }[]; summons: { id: string; name: string; assetSlot?: string; terms: string }[]; bijuu: { id: string; name: string; temperament: string; assetSlot?: string }[] };
 export type Scar = { id: string; name: string; adaptation: string; fieldCondition: string };
 export type Injury = { name: string; severity: number; days: number; scar?: Scar };
 export type ChronicleEntry = { day: number; type: string; text: string };
@@ -17,7 +17,7 @@ export type SupplyId = 'antidote' | 'sealing-slate';
 export type Inventory = Record<SupplyId, number>;
 export type Research = { sealing: number };
 export type SageForm = 'stone' | 'storm' | 'veil';
-export type PersonalModes = { sageInsight: number; sageActive: boolean; sageForms: SageForm[]; sageForm?: SageForm; gateTraining: number; openGates: 0 | 1 | 2 | 3 };
+export type PersonalModes = { sageInsight: number; sageActive: boolean; sageForms: SageForm[]; sageForm?: SageForm; gateTraining: number; openGates: 0 | 1 | 2 | 3; rikudoActive?: boolean };
 export type MentorDoctrine = 'guardian' | 'pathfinder' | 'seal-mentor' | 'vanguard-mentor' | 'field-healer';
 export type Mentor = { id: string; name: string; doctrine: MentorDoctrine; description: string; bond: number; lessons: number };
 export type Origin = { academyMemory: string; latentTag: Tag; description: string };
@@ -72,6 +72,7 @@ export type Command =
   | { type: 'CULTIVATE_BIJUU'; approach: BijuuApproach }
   | { type: 'TOGGLE_CLOAK' }
   | { type: 'TOGGLE_MANTLE' }
+  | { type: 'TOGGLE_RIKUDO' }
   | { type: 'TOGGLE_DOJUTSU' }
   | { type: 'CULTIVATE_DOJUTSU' }
   | { type: 'CULTIVATE_SUMMON' }

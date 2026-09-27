@@ -239,7 +239,7 @@ describe('career simulation', () => {
   });
   it('makes Bijuu cloak depend on a real control path and resolves its field state', () => {
     let s = genin(101);
-    s = applyCommand(s, { type: 'FORM_BIJUU_LINK', id: 'kurotsume' }, content);
+    s = applyCommand(s, { type: 'FORM_BIJUU_LINK', id: 'kurama' }, content);
     expect(() => applyCommand(s, { type: 'TOGGLE_CLOAK' }, content)).toThrow('Control 4');
     s = applyCommand(s, { type: 'CULTIVATE_BIJUU', approach: 'suppress' }, content);
     s = applyCommand(s, { type: 'TOGGLE_CLOAK' }, content);
@@ -318,7 +318,9 @@ describe('career simulation', () => {
     expect(s.character.summon?.favor).toBe(0);
   });
   it('loads the expanded catalogue and makes Kekkei Genkai techniques change field rules', () => {
-    expect(content.jutsu).toHaveLength(119);
+    expect(content.jutsu).toHaveLength(129);
+    expect(content.dojutsu.map(path => path.id)).toEqual(expect.arrayContaining(['kurogane-eye', 'lumen-eye', 'ashen-eye', 'sharingan', 'byakugan', 'rinnegan', 'tenseigan', 'ketsuryugan', 'jogan', 'kagura-eye']));
+    expect(content.bijuu.map(beast => beast.id)).toEqual(['shukaku', 'matatabi', 'isobu', 'son-goku', 'kokuo', 'saiken', 'chomei', 'gyuki', 'kurama', 'juubi']);
     expect(content.bloodlines.map(path => path.id)).toEqual(expect.arrayContaining(['wood-release', 'ice-release', 'crystal-release', 'yin-yang-release', 'sand-style', 'magnet-release', 'lava-release', 'boil-release', 'scorch-release', 'storm-release', 'explosion-release', 'metal-release', 'fire-style', 'water-style', 'wind-style', 'earth-style', 'lightning-style']));
     let s = genin(508);
     s = { ...s, character: { ...s.character, ryo: 200 } };
@@ -331,6 +333,20 @@ describe('career simulation', () => {
     s = applyCommand(s, { type: 'SET_COMBAT_PLAN', plan: 'contain' }, content);
     s = applyCommand(s, { type: 'RUN_MISSION' }, content);
     expect(s.combat?.steps[0].text).toContain('Mokuton reivindica o terreno');
+  });
+  it('gives each new dōjutsu a selectable technique and a distinct costly field focus', () => {
+    let s = genin(812); s = { ...s, character: { ...s.character, bloodline: 'sharingan', dojutsuActive: true, dojutsuStage: 1, ryo: 100 } };
+    s = applyCommand(s, { type: 'LEARN_JUTSU', id: 'sharingan-counter' }, content);
+    expect(s.character.knownJutsu).toContain('sharingan-counter');
+    s = applyCommand(s, { type: 'OFFER_MISSION' }, content); s = applyCommand(s, { type: 'MISSION_DECISION', decision: 'protect' }, content); s = applyCommand(s, { type: 'SET_COMBAT_PLAN', plan: 'contain' }, content); s = applyCommand(s, { type: 'RUN_MISSION' }, content); s = applyCommand(s, { type: 'FOCUS_DOJUTSU' }, content);
+    expect(s.combat?.steps[0].text).toContain('Sharingan memoriza');
+  });
+  it('reserves the Juubi and Rikudō Mode for a fully developed Jounin containment route', () => {
+    let s = genin(813); s = { ...s, stats: { ...s.stats, successes: 12 }, character: { ...s.character, rank: 'Jounin', loadout: ['binding-wire', 'scouts-eye', 'stone-guard', 'mist-step', 'warding-palm'], knownJutsu: ['binding-wire', 'scouts-eye', 'stone-guard', 'mist-step', 'warding-palm'], attributes: { ...s.character.attributes, willpower: 8, chakraControl: 8 }, bijuu: { id: 'juubi', name: 'Jūbi, a Dez-Caudas', trust: 5, respect: 8, control: 12, synchronization: 10, unrest: 2, cloakActive: true, mantleActive: true } } };
+    s = applyCommand(s, { type: 'TOGGLE_RIKUDO' }, content);
+    expect(s.character.modes.rikudoActive).toBe(true);
+    s = applyCommand(s, { type: 'OFFER_MISSION' }, content); s = applyCommand(s, { type: 'MISSION_DECISION', decision: 'protect' }, content); s = applyCommand(s, { type: 'SET_COMBAT_PLAN', plan: 'contain' }, content); s = applyCommand(s, { type: 'RUN_MISSION' }, content);
+    expect(s.combat?.steps[0].text).toContain('Modo Rikudō estabiliza');
   });
   it('offers a two-stage personal affinity arc before ordinary high-rank work', () => {
     let s = genin(509);

@@ -9,10 +9,10 @@ export function validateContent(raw: unknown): Content {
     ids.add(j.id);
   }
   for (const j of c.jutsu) for (const prerequisite of j.requires ?? []) if (!ids.has(prerequisite) || prerequisite === j.id) throw new Error(`Invalid jutsu prerequisites: ${j.id}`);
-  for (const list of [c.specializations, c.bloodlines, c.summons, c.bijuu]) for (const item of list ?? []) if (!item.id || !item.name) throw new Error('Content item missing stable id or name.');
+  for (const list of [c.specializations, c.bloodlines, c.dojutsu, c.summons, c.bijuu]) for (const item of list ?? []) if (!item.id || !item.name) throw new Error('Content item missing stable id or name.');
   const specializations = new Set((c.specializations ?? []).map(item => item.id));
   for (const j of c.jutsu) if (j.specialization && !specializations.has(j.specialization)) throw new Error(`Invalid jutsu specialization: ${j.id}`);
-  const bloodlines = new Set((c.bloodlines ?? []).map(item => item.id));
+  const bloodlines = new Set([...(c.bloodlines ?? []), ...(c.dojutsu ?? [])].map(item => item.id));
   for (const j of c.jutsu) if (j.bloodline && !bloodlines.has(j.bloodline)) throw new Error(`Invalid jutsu bloodline: ${j.id}`);
   return c;
 }
