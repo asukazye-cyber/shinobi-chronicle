@@ -68,6 +68,10 @@ The three non-hunter contracts continue at A rank instead of ending at a single 
 
 Each life receives a bounded Academy-origin memory and a named mentor from the same deterministic seed as starting aptitudes and trait. Origins are non-family background color with a latent tactical tag; they never invalidate a build or grant a hidden power score. Mentors use one of five doctrines—guardian, pathfinder, seal mentor, vanguard, or field healer—and remain the existing sensei relationship rather than becoming a separate NPC-management system. Up to three bond-gated lessons grant one named development attribute each and unlock an optional mission consultation. Consultation affects a specific plan/priority variable for that operation and is consumed by that mission; it is neither a daily chore nor a universal bonus.
 
+### Seeded potential
+
+Potential is a separate, visible life-origin contract rather than a level or a hidden combat multiplier. The deterministic seed selects one profile: **Prodigy** (about 10%) begins with one strongly developed aptitude and one blind spot, and B-rank-or-higher encounters account for the extra attention that early fame creates; **Difficult Start** (about 15%) begins below the ordinary aptitude curve but, on the third mission success, permanently awakens a +2 development in the tactical inclination chosen in the Academy prologue; **Ordinary** begins without either extreme. Personality traits still apply their independent trade-offs. Potential never caps later training, removes a build option, or determines rank: it changes the opening story and the shape of early pressure, not the player's agency.
+
 | Mentor doctrine | Three lesson developments | Mission counsel |
 | --- | --- | --- |
 | Guardian (Sena) | Stamina → Willpower → Chakra Control | Reduces pressure; strongest protecting/containing. |

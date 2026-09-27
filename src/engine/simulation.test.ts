@@ -57,7 +57,22 @@ describe('career simulation', () => {
     const b = createGame('Aki', 707);
     expect(a.character).toEqual(b.character);
     expect(a.character.trait).toBeDefined();
-    expect(Object.values(a.character.attributes).every(value => value >= 2 && value <= 5)).toBe(true);
+    expect(a.character.potential).toBeDefined();
+    expect(Object.values(a.character.attributes).every(value => value >= 1 && value <= 7)).toBe(true);
+    const profiles = Array.from({ length: 100 }, (_, seed) => createGame('Aki', seed).character.potential.profile);
+    expect(profiles).toContain('prodigy');
+    expect(profiles).toContain('late-bloomer');
+  });
+  it('lets a difficult start awaken after three successful missions in the chosen field inclination', () => {
+    const seed = Array.from({ length: 100 }, (_, value) => value + 1).find(value => createGame('Aki', value).character.potential.profile === 'late-bloomer')!;
+    let s = genin(seed); const before = s.character.attributes.intelligence;
+    s = { ...s, stats: { ...s.stats, successes: 2 }, offer: { id: 'breakthrough', rank: 'D', title: 'Primeiro avanço', objective: 'Proteger uma rota.', intel: 'A abertura é estreita.', statedRisk: 'baixo', dilemma: 'Teste.', reward: 1, hiddenThreat: 1, decision: 'protect', plan: 'contain', preparation: [] }, combat: { plan: 'contain', round: 0, advantage: 50, pressure: 1, chakra: 100, exposure: 0, leadHistory: [], supportUsage: {}, steps: [{ round: 0, success: true, text: 'O campo se abre.' }] } };
+    s = applyCommand(s, { type: 'RESOLVE_COMBAT_BEAT', approach: 'probe', jutsuId: 'binding-wire' }, content);
+    s = applyCommand(s, { type: 'RESOLVE_COMBAT_BEAT', approach: 'commit', jutsuId: 'scouts-eye' }, content);
+    s = applyCommand(s, { type: 'RESOLVE_COMBAT_BEAT', approach: 'protect', jutsuId: 'stone-guard' }, content);
+    expect(s.character.potential.breakthrough).toBe(true);
+    expect(s.character.attributes.intelligence).toBe(before + 2);
+    expect(s.world.storyFlags).toContain('potential:late-bloomer:breakthrough');
   });
   it('is deterministic for the same state and command sequence', () => {
     const play = () => { let s = genin(21); s = applyCommand(s, { type: 'SET_LOADOUT', jutsuIds: ['binding-wire', 'scouts-eye', 'stone-guard'] }, content); s = applyCommand(s, { type: 'OFFER_MISSION' }, content); s = applyCommand(s, { type: 'MISSION_DECISION', decision: 'protect' }, content); s = applyCommand(s, { type: 'PREPARE', method: 'intel' }, content); return runMission(s); };
