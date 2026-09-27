@@ -364,6 +364,21 @@ describe('career simulation', () => {
     expect(s.offer?.title).toBe('O Preço do Eclipse');
     expect(s.offer?.intel).toContain('Pacto do Eclipse');
   });
+  it('continues a resolved faction contract into an A-rank consequence whose priority changes the world', () => {
+    let s = genin(905);
+    s = { ...s, stats: { ...s.stats, successes: 14 }, world: { ...s.world, storyFlags: ['affinity:sand-style:first', 'affinity:sand-style:second', 'faction:eclipse-covenant:terms'], factions: s.world.factions.map(faction => faction.id === 'eclipse-covenant' ? { ...faction, standing: 3 } : faction) }, character: { ...s.character, rank: 'Jounin', bloodline: 'sand-style', loadout: ['binding-wire', 'scouts-eye', 'stone-guard', 'mist-step', 'warding-palm'], knownJutsu: ['binding-wire', 'scouts-eye', 'stone-guard', 'mist-step', 'warding-palm'] } };
+    s = applyCommand(s, { type: 'OFFER_MISSION' }, content);
+    expect(s.offer?.arcId).toBe('faction:eclipse-covenant:archive');
+    expect(s.offer?.title).toBe('O Arquivo que Respira');
+    const councilBefore = s.world.councilTrust;
+    s = { ...s, offer: { ...s.offer!, decision: 'protect', plan: 'contain' }, combat: { plan: 'contain', round: 0, advantage: 20, pressure: 0, chakra: 100, exposure: 0, leadHistory: [], supportUsage: {}, steps: [] } };
+    s = applyCommand(s, { type: 'RESOLVE_COMBAT_BEAT', approach: 'protect', jutsuId: 'binding-wire' }, content);
+    s = applyCommand(s, { type: 'RESOLVE_COMBAT_BEAT', approach: 'probe', jutsuId: 'scouts-eye' }, content);
+    s = applyCommand(s, { type: 'RESOLVE_COMBAT_BEAT', approach: 'protect', jutsuId: 'stone-guard' }, content);
+    expect(s.world.storyFlags).toContain('faction:eclipse-covenant:archive:protect');
+    expect(s.world.councilTrust).toBeGreaterThan(councilBefore);
+    expect(s.character.honor).toBeGreaterThan(0);
+  });
   it('makes a missing-nin face the hunters before a conditional return, never a free reset', () => {
     let s = genin(904);
     s = { ...s, stats: { ...s.stats, successes: 14 }, world: { ...s.world, councilTrust: 1, storyFlags: ['faction:hunter-directorate:first'], missingNin: { reason: 'dossiê do conselho e caçada iminente', wantedLevel: 2, huntersAlerted: true } }, character: { ...s.character, rank: 'Jounin', careerPath: 'rogue', honor: 4, notoriety: 9, loadout: ['binding-wire', 'scouts-eye', 'stone-guard', 'mist-step', 'warding-palm'], knownJutsu: ['binding-wire', 'scouts-eye', 'stone-guard', 'mist-step', 'warding-palm'] } };
