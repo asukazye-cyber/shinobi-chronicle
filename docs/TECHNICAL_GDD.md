@@ -25,6 +25,7 @@ Personal transformations are deliberate field commitments, not passive multiplie
 ## Core domain and invariants
 
 - `Character`: attributes describe capacity; traits/potential describe tendencies and ceilings; jutsu describe actions. Training improves a chosen dimension and advances time; it does not create a separate maintenance meter.
+- `Training ceilings`: ordinary training stops at the phase ceiling: Academy **C / 6**, Genin **B / 8**, Chuunin **A / 10**, Jounin **S / 12**. A prodigy may begin with a rare B aptitude in the Academy but cannot grind it further there. **S+ / 13+** is deliberately not a training target; it is reserved for later authored exceptional/legacy events so a new life cannot trivialize its own progression.
 - `Calendar`: every state change advances an explicit number of days. Seasonal advances create deterministic world events; chakra, strain and injury alter specific choices and outcomes without a universal fatigue gauge.
 - `Mission`: offer intelligence is imperfect; preparation produces different advantages; withdrawal has a reputation consequence. S-rank access requires a named Jounin appointment and accumulated field results; path-specific crisis operations use different objectives and tactical conditions. A mission is not merely an XP button.
 - `Career`: Genin's Circuit Regional uses a real crisis rather than a bracket fight. Its signature improves matching late-career operations but is never a hard build lock; the player can still earn any compatible appointment by meeting the other conditions.

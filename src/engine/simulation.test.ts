@@ -43,6 +43,14 @@ describe('career simulation', () => {
     expect(s.character.day).toBeGreaterThan(1);
     expect(s.character.attributes.intelligence + s.character.attributes.handSeals).toBeGreaterThanOrEqual(8);
   });
+  it('enforces phase-specific training ceilings so the Academy cannot farm endgame grades', () => {
+    let academy = createGame('Aki', 111);
+    academy = { ...academy, character: { ...academy.character, attributes: { ...academy.character.attributes, intelligence: 6 } } };
+    expect(() => applyCommand(academy, { type: 'TRAIN', attribute: 'intelligence' }, content)).toThrow('limite desta fase (6)');
+    let s = genin(112);
+    s = { ...s, character: { ...s.character, attributes: { ...s.character.attributes, ninjutsu: 8 } } };
+    expect(() => applyCommand(s, { type: 'TRAIN', attribute: 'ninjutsu' }, content)).toThrow('limite desta fase (8)');
+  });
   it('opens each life with a resolved Academy scene that leaves a contextual field inclination', () => {
     let s = createGame('Aki', 515);
     expect(s.academyIntroduction?.prompt).toContain('primeiro exercício');
