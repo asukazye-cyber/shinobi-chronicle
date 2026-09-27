@@ -32,6 +32,8 @@ export type ChuuninExam = { choices: ChuuninExamChoice[]; prompt: string };
 export type GeninFieldMark = 'guardian' | 'scout' | 'mediator';
 export type RegionalCircuitChoice = 'shield' | 'trace' | 'parley';
 export type RegionalCircuit = { prompt: string; host: string; choices: RegionalCircuitChoice[] };
+export type AcademyIntroChoice = 'shield' | 'trace' | 'challenge';
+export type AcademyIntroduction = { prompt: string; choices: AcademyIntroChoice[] };
 export type FactionId = 'eclipse-covenant' | 'red-hands' | 'hunter-directorate' | 'ashen-lotus';
 export type FactionState = { id: FactionId; name: string; agenda: string; standing: number; heat: number };
 export type CareerCrisis = { defeatStreak: number; lastSetback?: string; warrant?: string };
@@ -48,10 +50,11 @@ export type MissionReport = { outcome: 'success' | 'partial' | 'failure' | 'with
 export type LifetimeStats = { missions: number; successes: number; partials: number; failures: number; trainings: number; relationshipsDeepened: number; ryoEarned: number; daysServed: number; highestMission: MissionRank };
 export type Legacy = { ending: 'retired' | 'fallen'; title: string; biography: string; honors: string[]; stats: LifetimeStats };
 export type Character = { name: string; village: string; rank: Rank; day: number; attributes: Record<Attribute, number>; trait: Trait; origin: Origin; mentor: Mentor; chakraPool: number; health: number; ryo: number; inventory: Inventory; research: Research; modes: PersonalModes; reputation: number; notoriety: number; honor: number; factionTrust: { village: number; underworld: number }; relationships: Relationship[]; geninFieldMark?: GeninFieldMark; specialization?: string; careerPath?: CareerPath; bloodline?: string; dojutsuActive: boolean; dojutsuStrain: number; dojutsuStage: number; dojutsuInsight: number; summon?: { id: string; name: string; bond: number; favor: number }; bijuu?: BijuuState; knownJutsu: string[]; loadout: string[]; mastery: Record<string, number>; scars: Scar[]; injury?: Injury };
-export type GameState = { saveVersion: 1; seed: number; rngState: number; character: Character; rival: Rival; npcs: Npc[]; team: Team; world: WorldState; regionalCircuit?: RegionalCircuit; chuuninExam?: ChuuninExam; narrative?: NarrativeMoment; stats: LifetimeStats; offer?: MissionOffer; combat?: CombatEncounter; lastReport?: MissionReport; chronicle: ChronicleEntry[]; legacy?: Legacy };
+export type GameState = { saveVersion: 1; seed: number; rngState: number; character: Character; rival: Rival; npcs: Npc[]; team: Team; world: WorldState; academyIntroduction?: AcademyIntroduction; regionalCircuit?: RegionalCircuit; chuuninExam?: ChuuninExam; narrative?: NarrativeMoment; stats: LifetimeStats; offer?: MissionOffer; combat?: CombatEncounter; lastReport?: MissionReport; chronicle: ChronicleEntry[]; legacy?: Legacy };
 export type Command =
   | { type: 'TRAIN'; attribute: Attribute }
   | { type: 'REST' }
+  | { type: 'RESOLVE_ACADEMY_INTRO'; choice: AcademyIntroChoice }
   | { type: 'GRADUATE' }
   | { type: 'PROMOTE' }
   | { type: 'LEARN_JUTSU'; id: string }

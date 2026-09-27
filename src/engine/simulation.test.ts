@@ -8,6 +8,7 @@ import { simulationEvents } from './events';
 const content = validateContent(raw);
 const genin = (seed = 88) => {
   let s = createGame('Aki', seed);
+  s = applyCommand(s, { type: 'RESOLVE_ACADEMY_INTRO', choice: 'trace' }, content);
   while (s.character.attributes.intelligence + s.character.attributes.handSeals < 8) {
     const attribute = s.character.attributes.intelligence <= s.character.attributes.handSeals ? 'intelligence' : 'handSeals';
     s = applyCommand(s, { type: 'TRAIN', attribute }, content);
@@ -41,6 +42,15 @@ describe('career simulation', () => {
     expect(s.character.rank).toBe('Genin');
     expect(s.character.day).toBeGreaterThan(1);
     expect(s.character.attributes.intelligence + s.character.attributes.handSeals).toBeGreaterThanOrEqual(8);
+  });
+  it('opens each life with a resolved Academy scene that leaves a contextual field inclination', () => {
+    let s = createGame('Aki', 515);
+    expect(s.academyIntroduction?.prompt).toContain('primeiro exercício');
+    s = applyCommand(s, { type: 'RESOLVE_ACADEMY_INTRO', choice: 'shield' }, content);
+    expect(s.academyIntroduction).toBeUndefined();
+    expect(s.character.origin.latentTag).toBe('support');
+    expect(s.character.honor).toBe(1);
+    expect(s.chronicle.at(-1)?.type).toBe('introduction');
   });
   it('creates varied but bounded starting profiles, including a deterministic trade-off trait', () => {
     const a = createGame('Aki', 707);

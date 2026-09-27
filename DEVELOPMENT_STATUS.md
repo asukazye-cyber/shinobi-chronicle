@@ -5,6 +5,7 @@
 - React/TypeScript web foundation and data-driven content pack validation.
 - Seeded deterministic RNG, versioned game-state codec, append-only chronicle, calendar and time-based injury recovery.
 - Complete playable career loop: Academy → Genin → Chuunin → Jounin → retirement/fallen ending → Hall of Legends biography.
+- Academy prologue: every new life begins with a short first-day scene involving the seeded mentor and rival. The player protects someone, traces a suspicious marker, or accepts the rival's challenge; that choice records a chronicle event and establishes a contextual support, perception, or mobility inclination without fixing a clan, family or future build.
 - D–A mission ladder, evolving mission templates, seasonal world events, faction trust, honor/notoriety and lifetime statistics.
 - Explainable combat report, finite chakra pool and technique costs, imperfect intelligence, preparation choices, withdrawal consequence, rewards, injuries, dōjutsu strain, mastery and rank-gated techniques.
 - Persistent sensei/rival/teammate bonds, team-preparation threshold, Tracker specialization, Kurogane dōjutsu activation and named Toad contract bond.
