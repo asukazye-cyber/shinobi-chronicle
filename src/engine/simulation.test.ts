@@ -356,6 +356,27 @@ describe('career simulation', () => {
     expect(s.world.missingNin?.huntersAlerted).toBe(true);
     expect(s.world.missingNin?.reason).toContain('dossiê');
   });
+  it('turns faction standing into a distinct authored operation instead of a generic mission reskin', () => {
+    let s = genin(903);
+    s = { ...s, stats: { ...s.stats, successes: 6 }, world: { ...s.world, storyFlags: ['affinity:sand-style:first'], factions: s.world.factions.map(faction => faction.id === 'eclipse-covenant' ? { ...faction, standing: 2 } : faction) }, character: { ...s.character, rank: 'Chuunin', bloodline: 'sand-style', loadout: ['binding-wire', 'scouts-eye', 'stone-guard', 'mist-step'], knownJutsu: ['binding-wire', 'scouts-eye', 'stone-guard', 'mist-step'] } };
+    s = applyCommand(s, { type: 'OFFER_MISSION' }, content);
+    expect(s.offer?.arcId).toBe('faction:eclipse-covenant:terms');
+    expect(s.offer?.title).toBe('O Preço do Eclipse');
+    expect(s.offer?.intel).toContain('Pacto do Eclipse');
+  });
+  it('makes a missing-nin face the hunters before a conditional return, never a free reset', () => {
+    let s = genin(904);
+    s = { ...s, stats: { ...s.stats, successes: 14 }, world: { ...s.world, councilTrust: 1, storyFlags: ['faction:hunter-directorate:first'], missingNin: { reason: 'dossiê do conselho e caçada iminente', wantedLevel: 2, huntersAlerted: true } }, character: { ...s.character, rank: 'Jounin', careerPath: 'rogue', honor: 4, notoriety: 9, loadout: ['binding-wire', 'scouts-eye', 'stone-guard', 'mist-step', 'warding-palm'], knownJutsu: ['binding-wire', 'scouts-eye', 'stone-guard', 'mist-step', 'warding-palm'] } };
+    s = applyCommand(s, { type: 'OFFER_MISSION' }, content);
+    expect(s.offer?.arcId).toBe('faction:hunter-directorate:reckoning');
+    expect(() => applyCommand(s, { type: 'SEEK_PARDON' }, content)).toThrow('Primeiro resolva Nome diante do Conselho');
+    s = { ...s, offer: undefined, world: { ...s.world, storyFlags: [...s.world.storyFlags, 'faction:hunter-directorate:reckoning'] } };
+    s = applyCommand(s, { type: 'SEEK_PARDON' }, content);
+    expect(s.world.missingNin).toBeUndefined();
+    expect(s.character.careerPath).toBeUndefined();
+    expect(s.world.storyFlags).toContain('faction:hunter-directorate:pardon');
+    expect(s.character.notoriety).toBe(5);
+  });
   it('generates a seeded mentor and turns a limited lesson into contextual mission counsel', () => {
     let s = genin(510);
     const mentor = s.character.mentor;

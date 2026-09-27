@@ -61,6 +61,7 @@ export type Command =
   | { type: 'RESOLVE_REGIONAL_CIRCUIT'; choice: RegionalCircuitChoice }
   | { type: 'RESOLVE_CHUUNIN_EXAM'; choice: ChuuninExamChoice }
   | { type: 'CHOOSE_CAREER_PATH'; path: CareerPath }
+  | { type: 'SEEK_PARDON' }
   | { type: 'SET_LOADOUT'; jutsuIds: string[] }
   | { type: 'CHOOSE_PATH'; kind: 'specialization' | 'bloodline' | 'summon'; id: string }
   | { type: 'FORM_BIJUU_LINK'; id: string }
