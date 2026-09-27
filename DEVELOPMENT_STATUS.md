@@ -1,0 +1,53 @@
+# Development status
+
+## Implemented (v0.2)
+
+- React/TypeScript web foundation and data-driven content pack validation.
+- Seeded deterministic RNG, versioned game-state codec, append-only chronicle, calendar, fatigue/injury/recovery.
+- Complete playable career loop: Academy → Genin → Chuunin → Jounin → retirement/fallen ending → Hall of Legends biography.
+- D–A mission ladder, evolving mission templates, seasonal world events, faction trust, honor/notoriety and lifetime statistics.
+- Explainable combat report, finite chakra pool and technique costs, imperfect intelligence, preparation choices, withdrawal consequence, rewards, injuries, dōjutsu strain, mastery and rank-gated techniques.
+- Persistent sensei/rival/teammate bonds, team-preparation threshold, Tracker specialization, Kurogane dōjutsu activation and named Toad contract bond.
+- Persistent contact roster with availability, goals, memories and independent seasonal deployments; a selectable two-ally field team with cohesion; mission dilemmas requiring protect/pursue/negotiate priority before deployment.
+- World-state layer with border tension, council trust, persistent rumors and discovered secrets; authored-style NPC arc moments whose choices change bonds, team cohesion, honor, council trust and secrets.
+- Browser-local autosave/load for the active life and a persistent Hall of Legends archive of up to 30 completed biographies.
+- First full Jinchūriki loop: Kurotsume Bijū link, trust/respect/control/synchronization/unrest tracks, cooperation/suppression/domination paths, a gated chakra cloak, the advanced Resonant Mantle, and mission-level risk/reward consequences.
+- Dōjutsu study loop with insight, strain and three evolution stages; reciprocal summon-contract loop with bond and earned favor.
+- Economy/logistics baseline: ryo-funded mission supplies and consumable sealing preparation. Ferimentos não exigem inventário, botões ou pesquisa: recuperam com o avanço natural dos dias.
+- Anti-bureaucracy pass: one-click recommended mission preparation; detailed preparation remains optional behind a collapsed panel.
+- Protagonist-focused modes: three distinct Sage disciplines (Stone, Storm, Veil), three trainable Gates, and an advanced Bijū mantle. Each has independent prerequisites, field effects, and explicit chakra/health/fatigue/unrest costs. Summons can now intervene once in a fight through bond/favor rather than acting as a static bonus.
+- Expanded original build catalogue: 119 jutsu spanning all tactical tags, unusual utility/control techniques and prerequisite branches; eight specializations; three dōjutsu lineages; twelve mechanical Kekkei Genkai/styles (including Areia, Magnetismo, Lava, Fervura, Calor, Tempestade, Explosão and Metal); five elemental-nature trees; and five summon contracts. A dedicated UI catalogue enforces one strong affinity/lineage path per life.
+- Replaced the old four-stat sheet with the main shinobi profile: Ninjutsu, Taijutsu, Genjutsu, Inteligência, Força, Velocidade, Stamina, Selos, Controle de Chakra and Força de Vontade. The UI displays raw score plus E–S+ band; old saves are migrated automatically.
+- Character creation now has controlled, seed-based variation: three aptitude points create distinct but bounded starting profiles (2–5), then one personality trait applies a visible benefit/trade-off. Neutral remains available for players who want no modifier. Traits affect concrete training, graduation and field decisions rather than a universal power score.
+- Origin and mentor pass: every seed now also produces a non-family Academy memory, latent tactical tag, and a named mentor with one of five doctrines. Mentors retain the sensei relationship and offer at most three bond-gated lessons, each granting a doctrine-specific attribute development plus optional contextual mission counsel; they do not create daily maintenance screens.
+- Rival pass: every seed now generates an original named Blue-style career rival with a coherent style/affinity, preferred tactical response, independent reputation/rivalry, career-stage encounters and lasting memory. Challenge, study and earned alliance are limited between-operation choices; studying grants one counterpoint development per career stage instead of repeatable farming.
+- Career depth pass: the Chuunin examination records an actual field priority; Jounin can earn one irreversible ANBU, Sensei, Commander or missing-nin path. Each path changes operational rules, S-rank crisis content and the final legacy. Kage is an earned Commander legacy, not a menu selection.
+- Campaign-depth pass: three general S-rank crises and two S-rank operations for each Jounin appointment now join the mission pool. Builds can unlock three-stage personal operations (B → A → S) for affinity/lineage, summon contract, Bijuu bond or Sage practice; an advanced rival can culminate in its own S-rank resolution. Nine seeded seasonal events keep rumors, border tension, council trust, resources, natural chakra and reputation moving between operations. Completing an arc records a durable world secret, honor/reputation consequence, chronicle entry and save-safe story flag; failure leaves the operation unresolved instead of silently completing it.
+- Dōjutsu expansion: Kurogane, Lumen and Ashen now have distinct B → A → S sight/responsibility arcs, gated by actual eye stage and insight rather than the generic affinity chain. The five summon contracts also use separate operation text and dilemmas consistent with their reconnaissance, tracking, concealment, terrain or route-reading identities.
+- Career-crisis pass: failed missions now build a visible defeat streak instead of silently disappearing. Severe failures create injuries whose recovery is determined only by time; after a serious recovery, a contextual scar can change only relevant field commitments (pressure, ocular focus or transformation), never a flat permanent stat penalty. A prolonged collapse can create a council warrant and make the missing-nin route an earned escape/choice rather than a cosmetic job selection.
+- Faction foundation: Pacto do Eclipse, Mãos Rubras, Diretoria de Caçadores and Lótus Cinzento each have agenda, standing and heat. B-rank-and-above briefings identify their involvement; mission result/priority and seasonal events alter their memory. A missing-nin is actively pursued by the Caçadores, while criminal networks and civilian dissidents react differently.
+- Genin now has a regional inter-village field circuit after two successful missions. Its three crisis responses establish a reusable Guardião, Batedor or Mediador signature, feed distinct social/world consequences, and influence later compatible career operations without locking the player out of a build.
+- Reworked mission combat into the primary interactive event: choose a field plan, then select both intent and an equipped jutsu across three simulated exchanges. Each exchange persists advantage, pressure, chakra and exposure, and withdrawal remains possible from inside combat. The report stays deterministic and explains the exact technique/intent match.
+- Combat loadouts now behave as kits rather than isolated buttons: a lead technique cannot repeat on consecutive exchanges when another is equipped, and a compatible off-lead technique joins automatically as a chakra-costing continuation. The engine records that chain and rotates supporting techniques, so build composition is materially visible in every report.
+- Slot architecture pass: base jutsu deck now grows 3 Genin → 4 Chuunin → 5 Jounin and is automatically completed with replaceable starter techniques on rank-up or old-save migration. A persistent jutsu library now separates study from equipment and preserves mastery off-deck. Dōjutsu, specialization, summon, Bijuu, personal modes and logistics remain visible independent channels instead of competing for those slots.
+- First authored technique-tree slice: prerequisite-validated advanced jutsu branches (restraint, sentinel, mobility and sealwright) now require their parent techniques and, when relevant, specialization. First real dōjutsu combat technique layer: one lineage-specific focus per mission with chakra/strain cost and different field rules for Kurogane, Lumen and Ashen.
+- Automated tests for validation, event publication/logging, determinism, save/load, progression, promotion/legacy, seasonal world simulation, risk/reward, and combat explanations.
+
+## Designed, not implemented
+
+Full NPC schedules and independent lives beyond seasonal availability; teams with tactics, conflict and member departure; more S-rank mission arcs; additional dōjutsu technique trees; summon encounters and contract requests; additional Bijū transformations/content; additional Sage/Gates forms; more Kekkei Genkai families and clan-specific authored arcs; faction recruitment/defection chains and multi-village politics beyond the current agenda/heat model; longer authored narrative chains beyond the current three-stage personal operations; mentor turning-point scenes beyond the current doctrine/lesson model; crafting and broader economy/research; mod-pack discovery; and save migrations beyond v1.
+
+## Decisions
+
+React + TypeScript + Vite was chosen because the empty repository needs a fast, portable UI shell while keeping the simulation independent and testable. No external images are required.
+
+## Verify
+
+`npm install`  
+`npm run test`  
+`npm run build`  
+`npm run dev`
+
+## Next milestone
+
+Expand existing dōjutsu, summon, Bijū and personal-mode paths with authored turning points and more branch-specific conclusions, while preserving the current no-routine-screen campaign flow.
