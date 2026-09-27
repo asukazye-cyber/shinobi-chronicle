@@ -3,7 +3,7 @@
 ## Implemented (v0.2)
 
 - React/TypeScript web foundation and data-driven content pack validation.
-- Seeded deterministic RNG, versioned game-state codec, append-only chronicle, calendar, fatigue/injury/recovery.
+- Seeded deterministic RNG, versioned game-state codec, append-only chronicle, calendar and time-based injury recovery.
 - Complete playable career loop: Academy → Genin → Chuunin → Jounin → retirement/fallen ending → Hall of Legends biography.
 - D–A mission ladder, evolving mission templates, seasonal world events, faction trust, honor/notoriety and lifetime statistics.
 - Explainable combat report, finite chakra pool and technique costs, imperfect intelligence, preparation choices, withdrawal consequence, rewards, injuries, dōjutsu strain, mastery and rank-gated techniques.
@@ -15,7 +15,7 @@
 - Dōjutsu study loop with insight, strain and three evolution stages; reciprocal summon-contract loop with bond and earned favor.
 - Economy/logistics baseline: ryo-funded mission supplies and consumable sealing preparation. Ferimentos não exigem inventário, botões ou pesquisa: recuperam com o avanço natural dos dias.
 - Anti-bureaucracy pass: one-click recommended mission preparation; detailed preparation remains optional behind a collapsed panel.
-- Protagonist-focused modes: three distinct Sage disciplines (Stone, Storm, Veil), three trainable Gates, and an advanced Bijū mantle. Each has independent prerequisites, field effects, and explicit chakra/health/fatigue/unrest costs. Summons can now intervene once in a fight through bond/favor rather than acting as a static bonus.
+- Protagonist-focused modes: three distinct Sage disciplines (Stone, Storm, Veil), three trainable Gates, and an advanced Bijū mantle. Each has independent prerequisites, field effects, and explicit chakra/health/unrest costs. Summons can now intervene once in a fight through bond/favor rather than acting as a static bonus.
 - Expanded original build catalogue: 119 jutsu spanning all tactical tags, unusual utility/control techniques and prerequisite branches; eight specializations; three dōjutsu lineages; twelve mechanical Kekkei Genkai/styles (including Areia, Magnetismo, Lava, Fervura, Calor, Tempestade, Explosão and Metal); five elemental-nature trees; and five summon contracts. A dedicated UI catalogue enforces one strong affinity/lineage path per life.
 - Replaced the old four-stat sheet with the main shinobi profile: Ninjutsu, Taijutsu, Genjutsu, Inteligência, Força, Velocidade, Stamina, Selos, Controle de Chakra and Força de Vontade. The UI displays raw score plus E–S+ band; old saves are migrated automatically.
 - Character creation now has controlled, seed-based variation: three aptitude points create distinct but bounded starting profiles (2–5), then one personality trait applies a visible benefit/trade-off. Neutral remains available for players who want no modifier. Traits affect concrete training, graduation and field decisions rather than a universal power score.
