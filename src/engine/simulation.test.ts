@@ -51,6 +51,14 @@ describe('career simulation', () => {
     s = { ...s, character: { ...s.character, attributes: { ...s.character.attributes, ninjutsu: 8 } } };
     expect(() => applyCommand(s, { type: 'TRAIN', attribute: 'ninjutsu' }, content)).toThrow('limite desta fase (8)');
   });
+  it('lets a prodigy exceed the normal ceiling in one recorded signature without opening every stat to grinding', () => {
+    const seed = Array.from({ length: 100 }, (_, value) => value + 1).find(value => createGame('Aki', value).character.potential.profile === 'prodigy')!;
+    let s = createGame('Aki', seed); const specialty = s.character.potential.specialty!;
+    s = { ...s, character: { ...s.character, rank: 'Genin', attributes: { ...s.character.attributes, [specialty]: 8 } } };
+    s = applyCommand(s, { type: 'TRAIN', attribute: specialty }, content);
+    expect(s.character.attributes[specialty]).toBe(9);
+    expect(() => applyCommand(s, { type: 'TRAIN', attribute: specialty }, content)).toThrow('limite desta fase (9)');
+  });
   it('opens each life with a resolved Academy scene that leaves a contextual field inclination', () => {
     let s = createGame('Aki', 515);
     expect(s.academyIntroduction?.prompt).toContain('primeiro exercício');

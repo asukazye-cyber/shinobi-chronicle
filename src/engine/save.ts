@@ -4,7 +4,7 @@ export function decodeSave(json: string): GameState { const state = JSON.parse(j
 
 function applyProgressionMigration(state: GameState): GameState {
   const ceiling = state.character.rank === 'Academy' ? 6 : state.character.rank === 'Genin' ? 8 : state.character.rank === 'Chuunin' ? 10 : 12;
-  const attributes = Object.fromEntries(Object.entries(state.character.attributes).map(([key, value]) => [key, Math.min(value, ceiling)])) as GameState['character']['attributes'];
+  const attributes = Object.fromEntries(Object.entries(state.character.attributes).map(([key, value]) => [key, Math.min(value, ceiling + Number(state.character.potential?.specialty === key))])) as GameState['character']['attributes'];
   const changed = Object.entries(attributes).some(([key, value]) => value !== state.character.attributes[key as keyof typeof state.character.attributes]);
   if (!changed) return state;
   state.character.attributes = attributes;
