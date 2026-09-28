@@ -8,6 +8,8 @@ import { simulationEvents } from './events';
 const content = validateContent(raw);
 const genin = (seed = 88) => {
   let s = createGame('Aki', seed);
+  s = applyCommand(s, { type: 'SET_TRAINING_FOCUS', attribute: 'intelligence' }, content);
+  s = applyCommand(s, { type: 'SET_TRAINING_FOCUS', attribute: 'handSeals' }, content);
   s = applyCommand(s, { type: 'RESOLVE_ACADEMY_INTRO', choice: 'trace' }, content);
   while (s.character.attributes.intelligence + s.character.attributes.handSeals < 8) {
     const attribute = s.character.attributes.intelligence <= s.character.attributes.handSeals ? 'intelligence' : 'handSeals';
@@ -30,7 +32,8 @@ describe('content validation', () => {
 describe('career simulation', () => {
   it('writes a durable chronicle and publishes the corresponding domain event', () => {
     const seen: string[] = []; const unsubscribe = simulationEvents.subscribe(event => seen.push(event.type));
-    const state = applyCommand(createGame('Aki'), { type: 'TRAIN', attribute: 'intelligence' }, content);
+    let start = createGame('Aki'); start = applyCommand(start, { type: 'SET_TRAINING_FOCUS', attribute: 'intelligence' }, content); start = applyCommand(start, { type: 'SET_TRAINING_FOCUS', attribute: 'handSeals' }, content);
+    const state = applyCommand(start, { type: 'TRAIN', attribute: 'intelligence' }, content);
     unsubscribe();
     expect(state.chronicle.at(-1)?.type).toBe('training');
     expect(seen).toContain('training');
@@ -45,19 +48,30 @@ describe('career simulation', () => {
   });
   it('enforces phase-specific training ceilings so the Academy cannot farm endgame grades', () => {
     let academy = createGame('Aki', 111);
-    academy = { ...academy, character: { ...academy.character, attributes: { ...academy.character.attributes, intelligence: 6 } } };
+    academy = { ...academy, character: { ...academy.character, attributes: { ...academy.character.attributes, intelligence: 6 }, development: { ...academy.character.development, focus: ['intelligence', 'handSeals'] } } };
     expect(() => applyCommand(academy, { type: 'TRAIN', attribute: 'intelligence' }, content)).toThrow('limite desta fase (6)');
     let s = genin(112);
-    s = { ...s, character: { ...s.character, attributes: { ...s.character.attributes, ninjutsu: 8 } } };
+    s = { ...s, character: { ...s.character, attributes: { ...s.character.attributes, ninjutsu: 8 }, development: { ...s.character.development, focus: ['ninjutsu', 'handSeals'] } } };
     expect(() => applyCommand(s, { type: 'TRAIN', attribute: 'ninjutsu' }, content)).toThrow('limite desta fase (8)');
   });
   it('lets a prodigy exceed the normal ceiling in one recorded signature without opening every stat to grinding', () => {
     const seed = Array.from({ length: 100 }, (_, value) => value + 1).find(value => createGame('Aki', value).character.potential.profile === 'prodigy')!;
     let s = createGame('Aki', seed); const specialty = s.character.potential.specialty!;
-    s = { ...s, character: { ...s.character, rank: 'Genin', attributes: { ...s.character.attributes, [specialty]: 8 } } };
+    s = { ...s, character: { ...s.character, rank: 'Genin', attributes: { ...s.character.attributes, [specialty]: 8 }, development: { phase: 'Genin', focus: [specialty, 'willpower'], sessions: 0, limit: 6 } } };
     s = applyCommand(s, { type: 'TRAIN', attribute: specialty }, content);
     expect(s.character.attributes[specialty]).toBe(9);
     expect(() => applyCommand(s, { type: 'TRAIN', attribute: specialty }, content)).toThrow('limite desta fase (9)');
+  });
+  it('makes stat growth a focused commitment instead of allowing every attribute to be maxed in one phase', () => {
+    let s = createGame('Aki', 906);
+    expect(() => applyCommand(s, { type: 'TRAIN', attribute: 'ninjutsu' }, content)).toThrow('Escolha dois focos');
+    s = applyCommand(s, { type: 'SET_TRAINING_FOCUS', attribute: 'ninjutsu' }, content);
+    s = applyCommand(s, { type: 'SET_TRAINING_FOCUS', attribute: 'chakraControl' }, content);
+    expect(() => applyCommand(s, { type: 'TRAIN', attribute: 'taijutsu' }, content)).toThrow('não é foco');
+    s = applyCommand(s, { type: 'TRAIN', attribute: 'ninjutsu' }, content);
+    expect(() => applyCommand(s, { type: 'SET_TRAINING_FOCUS', attribute: 'taijutsu' }, content)).toThrow('já está em prática');
+    s = { ...s, character: { ...s.character, development: { ...s.character.development, sessions: s.character.development.limit } } };
+    expect(() => applyCommand(s, { type: 'TRAIN', attribute: 'ninjutsu' }, content)).toThrow('sessões decisivas');
   });
   it('opens each life with a resolved Academy scene that leaves a contextual field inclination', () => {
     let s = createGame('Aki', 515);

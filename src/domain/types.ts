@@ -27,6 +27,8 @@ export type PreparationMethod = 'intel' | 'gear' | 'team' | 'summon' | 'seal' | 
 export type TraitId = 'neutral' | 'disciplined' | 'instinctive' | 'resilient' | 'precise' | 'fierce' | 'contemplative';
 export type Trait = { id: TraitId; name: string; description: string; modifiers: Partial<Record<Attribute, number>> };
 export type Potential = { profile: 'prodigy' | 'ordinary' | 'late-bloomer'; breakthrough: boolean; specialty?: Attribute; blindSpot?: Attribute };
+/** The few deliberate stat investments available before the next career promotion. */
+export type DevelopmentPlan = { phase: Rank; focus: Attribute[]; sessions: number; limit: number };
 export type CareerPath = 'anbu' | 'sensei' | 'commander' | 'rogue';
 export type ChuuninExamChoice = 'rescue' | 'secure' | 'analyze';
 export type ChuuninExam = { choices: ChuuninExamChoice[]; prompt: string };
@@ -50,9 +52,10 @@ export type CombatStep = { round: number; text: string; success: boolean };
 export type MissionReport = { outcome: 'success' | 'partial' | 'failure' | 'withdrawn'; rank: MissionRank; decision: MissionChoice; reward: number; reputation: number; injury?: Injury; steps: CombatStep[] };
 export type LifetimeStats = { missions: number; successes: number; partials: number; failures: number; trainings: number; relationshipsDeepened: number; ryoEarned: number; daysServed: number; highestMission: MissionRank };
 export type Legacy = { ending: 'retired' | 'fallen'; title: string; biography: string; honors: string[]; stats: LifetimeStats };
-export type Character = { name: string; village: string; rank: Rank; day: number; attributes: Record<Attribute, number>; trait: Trait; potential: Potential; origin: Origin; mentor: Mentor; chakraPool: number; health: number; ryo: number; inventory: Inventory; research: Research; modes: PersonalModes; reputation: number; notoriety: number; honor: number; factionTrust: { village: number; underworld: number }; relationships: Relationship[]; geninFieldMark?: GeninFieldMark; specialization?: string; careerPath?: CareerPath; bloodline?: string; dojutsuActive: boolean; dojutsuStrain: number; dojutsuStage: number; dojutsuInsight: number; summon?: { id: string; name: string; bond: number; favor: number }; bijuu?: BijuuState; knownJutsu: string[]; loadout: string[]; mastery: Record<string, number>; scars: Scar[]; injury?: Injury };
+export type Character = { name: string; village: string; rank: Rank; day: number; attributes: Record<Attribute, number>; trait: Trait; potential: Potential; origin: Origin; mentor: Mentor; development: DevelopmentPlan; chakraPool: number; health: number; ryo: number; inventory: Inventory; research: Research; modes: PersonalModes; reputation: number; notoriety: number; honor: number; factionTrust: { village: number; underworld: number }; relationships: Relationship[]; geninFieldMark?: GeninFieldMark; specialization?: string; careerPath?: CareerPath; bloodline?: string; dojutsuActive: boolean; dojutsuStrain: number; dojutsuStage: number; dojutsuInsight: number; summon?: { id: string; name: string; bond: number; favor: number }; bijuu?: BijuuState; knownJutsu: string[]; loadout: string[]; mastery: Record<string, number>; scars: Scar[]; injury?: Injury };
 export type GameState = { saveVersion: 1; seed: number; rngState: number; character: Character; rival: Rival; npcs: Npc[]; team: Team; world: WorldState; academyIntroduction?: AcademyIntroduction; regionalCircuit?: RegionalCircuit; chuuninExam?: ChuuninExam; narrative?: NarrativeMoment; stats: LifetimeStats; offer?: MissionOffer; combat?: CombatEncounter; lastReport?: MissionReport; chronicle: ChronicleEntry[]; legacy?: Legacy };
 export type Command =
+  | { type: 'SET_TRAINING_FOCUS'; attribute: Attribute }
   | { type: 'TRAIN'; attribute: Attribute }
   | { type: 'REST' }
   | { type: 'RESOLVE_ACADEMY_INTRO'; choice: AcademyIntroChoice }
