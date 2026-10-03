@@ -151,7 +151,7 @@ describe('career simulation', () => {
     s = applyCommand(s, { type: 'STUDY_DISCIPLINE', id: 'sealwright' }, content);
     expect(s.character.disciplines).toContain('sealwright');
     const branch = content.jutsu.find(jutsu => jutsu.specialization === 'sealwright')!;
-    s = { ...s, character: { ...s.character, ryo: 999, knownJutsu: [...s.character.knownJutsu, ...(branch.requires ?? [])] } };
+    s = { ...s, character: { ...s.character, rank: 'Chuunin', ryo: 999, knownJutsu: [...s.character.knownJutsu, ...(branch.requires ?? [])] } };
     expect(() => applyCommand(s, { type: 'LEARN_JUTSU', id: branch.id }, content)).not.toThrow();
   });
   it('migrates saves made before Sage disciplines and Resonant Mantle', () => {
