@@ -3,7 +3,7 @@ import raw from '../data/core.json';
 import { validateContent } from '../domain/validate';
 import { mergeContentPacks } from '../domain/mods';
 import { decodeSave, encodeSave } from './save';
-import { analyzeBuild, applyCommand, createGame } from './simulation';
+import { analyzeBuild, applyCommand, assessCharacter, createGame } from './simulation';
 import { simulationEvents } from './events';
 
 const content = validateContent(raw);
@@ -136,6 +136,15 @@ describe('career simulation', () => {
     s = applyCommand(s, { type: 'SPEND_VILLAGE_DAY', activity: 'patrol' }, content);
     expect(s.world.borderTension).toBe(Math.max(0, tension - 1));
     expect(s.chronicle.at(-1)?.type).toBe('village');
+  });
+  it('creates a deterministic competitive roster and writes an annual OVR report without using OVR as combat resolution', () => {
+    let s = genin(941); const assessment = assessCharacter(s, content);
+    expect(s.competitive?.rosters.Genin).toHaveLength(10);
+    expect(s.competitive?.rosters.Genin.every(entry => entry.age >= 10 && entry.age <= 15)).toBe(true);
+    expect(assessment.overall).toBeGreaterThan(1);
+    for (let season = 0; season < 4; season++) s = applyCommand(s, { type: 'ADVANCE_SEASON' }, content);
+    expect(s.competitive?.annualReports).toHaveLength(1);
+    expect(s.competitive?.annualReports[0].missionRecord).toContain('missões');
   });
   it('migrates saves made before Sage disciplines and Resonant Mantle', () => {
     const legacy = JSON.parse(encodeSave(genin(14)));

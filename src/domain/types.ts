@@ -37,6 +37,12 @@ export type ChuuninExam = { choices: ChuuninExamChoice[]; prompt: string };
 export type TournamentKind = 'chuunin' | 'jounin';
 export type TournamentChoice = 'read' | 'control' | 'commit';
 export type Tournament = { kind: TournamentKind; host: string; entrants: string[]; round: 0 | 1 | 2; wins: number; prompt: string; history: string[] };
+export type CompetitiveRank = 'Genin' | 'Chuunin' | 'Jounin';
+export type CompetitorForm = 'em ascensão' | 'estável' | 'em queda' | 'lesionado';
+export type Competitor = { id: string; name: string; village: string; age: number; rank: CompetitiveRank; yearsInRank: number; overall: number; profile: string; form: CompetitorForm; wins: number; losses: number };
+export type AnnualBaseline = { year: number; overall: number; attributes: Record<Attribute, number>; mastery: number; missions: number; successes: number };
+export type AnnualReport = { year: number; overall: number; delta: number; trajectory: 'evolução' | 'regressão' | 'estável'; changedAttributes: string[]; masteryGained: number; missionRecord: string; circuitPosition: number; headline: string };
+export type CompetitiveState = { rosters: Record<CompetitiveRank, Competitor[]>; baseline: AnnualBaseline; annualReports: AnnualReport[] };
 export type GeninFieldMark = 'guardian' | 'scout' | 'mediator';
 export type RegionalCircuitChoice = 'shield' | 'trace' | 'parley';
 export type RegionalCircuit = { prompt: string; host: string; choices: RegionalCircuitChoice[] };
@@ -58,7 +64,7 @@ export type MissionReport = { outcome: 'success' | 'partial' | 'failure' | 'with
 export type LifetimeStats = { missions: number; successes: number; partials: number; failures: number; trainings: number; relationshipsDeepened: number; ryoEarned: number; daysServed: number; highestMission: MissionRank };
 export type Legacy = { ending: 'retired' | 'fallen'; title: string; biography: string; honors: string[]; stats: LifetimeStats };
 export type Character = { name: string; village: string; rank: Rank; day: number; attributes: Record<Attribute, number>; trait: Trait; potential: Potential; origin: Origin; mentor: Mentor; development: DevelopmentPlan; chakraPool: number; health: number; ryo: number; inventory: Inventory; research: Research; modes: PersonalModes; reputation: number; notoriety: number; honor: number; factionTrust: { village: number; underworld: number }; relationships: Relationship[]; geninFieldMark?: GeninFieldMark; specialization?: string; careerPath?: CareerPath; bloodline?: string; dojutsuActive: boolean; dojutsuStrain: number; dojutsuStage: number; dojutsuInsight: number; summon?: { id: string; name: string; bond: number; favor: number }; bijuu?: BijuuState; knownJutsu: string[]; loadout: string[]; mastery: Record<string, number>; scars: Scar[]; injury?: Injury };
-export type GameState = { saveVersion: 1; seed: number; rngState: number; character: Character; rival: Rival; npcs: Npc[]; team: Team; world: WorldState; academyIntroduction?: AcademyIntroduction; regionalCircuit?: RegionalCircuit; chuuninExam?: ChuuninExam; tournament?: Tournament; narrative?: NarrativeMoment; stats: LifetimeStats; offer?: MissionOffer; combat?: CombatEncounter; lastReport?: MissionReport; chronicle: ChronicleEntry[]; legacy?: Legacy };
+export type GameState = { saveVersion: 1; seed: number; rngState: number; character: Character; rival: Rival; npcs: Npc[]; team: Team; world: WorldState; competitive?: CompetitiveState; academyIntroduction?: AcademyIntroduction; regionalCircuit?: RegionalCircuit; chuuninExam?: ChuuninExam; tournament?: Tournament; narrative?: NarrativeMoment; stats: LifetimeStats; offer?: MissionOffer; combat?: CombatEncounter; lastReport?: MissionReport; chronicle: ChronicleEntry[]; legacy?: Legacy };
 export type Command =
   | { type: 'SET_TRAINING_FOCUS'; attribute: Attribute }
   | { type: 'TRAIN'; attribute: Attribute }
