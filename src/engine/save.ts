@@ -18,6 +18,7 @@ export function decodeSave(json: string): GameState {
   state.character.origin ??= { academyMemory: 'caderno de Academia', latentTag: 'perception', description: 'Uma origem preservada de uma vida anterior.' };
   state.character.mentor ??= { id: 'mizuno', name: state.character.relationships.find(r => r.id === 'sensei')?.name ?? 'Mizuno', doctrine: 'guardian', description: 'Ensina a proteger uma linha antes de vencê-la.', bond: state.character.relationships.find(r => r.id === 'sensei')?.bond ?? 12, lessons: 0 };
   state.character.dojutsuStage ??= 0; state.character.dojutsuInsight ??= 0; state.character.scars ??= []; state.character.inventory ??= { antidote: 0, 'sealing-slate': 0 }; state.character.research ??= { sealing: 0 };
+  state.character.disciplines ??= [];
   state.character.modes ??= { sageInsight: 0, sageActive: false, sageForms: [], gateTraining: 0, openGates: 0 }; state.character.modes.sageForms ??= [];
   if (state.character.bijuu) state.character.bijuu.mantleActive ??= false;
   if (state.character.summon) state.character.summon.favor ??= 0;

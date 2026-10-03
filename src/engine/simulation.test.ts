@@ -146,6 +146,14 @@ describe('career simulation', () => {
     expect(s.competitive?.annualReports).toHaveLength(1);
     expect(s.competitive?.annualReports[0].missionRecord).toContain('missões');
   });
+  it('lets a build cross-train disciplines and unlocks their technique branches without changing bloodline', () => {
+    let s = genin(942); s = { ...s, stats: { ...s.stats, successes: 2 }, character: { ...s.character, specialization: 'tracker', disciplines: [], ryo: 180 } };
+    s = applyCommand(s, { type: 'STUDY_DISCIPLINE', id: 'sealwright' }, content);
+    expect(s.character.disciplines).toContain('sealwright');
+    const branch = content.jutsu.find(jutsu => jutsu.specialization === 'sealwright')!;
+    s = { ...s, character: { ...s.character, ryo: 999, knownJutsu: [...s.character.knownJutsu, ...(branch.requires ?? [])] } };
+    expect(() => applyCommand(s, { type: 'LEARN_JUTSU', id: branch.id }, content)).not.toThrow();
+  });
   it('migrates saves made before Sage disciplines and Resonant Mantle', () => {
     const legacy = JSON.parse(encodeSave(genin(14)));
     delete legacy.character.modes.sageForms;
