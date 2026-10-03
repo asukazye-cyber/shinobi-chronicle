@@ -1,8 +1,9 @@
 import { describe, expect, it } from 'vitest';
 import raw from '../data/core.json';
 import { validateContent } from '../domain/validate';
+import { mergeContentPacks } from '../domain/mods';
 import { decodeSave, encodeSave } from './save';
-import { applyCommand, createGame } from './simulation';
+import { analyzeBuild, applyCommand, createGame } from './simulation';
 import { simulationEvents } from './events';
 
 const content = validateContent(raw);
@@ -27,6 +28,11 @@ describe('content validation', () => {
   it('rejects unknown combat tags and duplicate ids', () => {
     expect(() => validateContent({ ...raw, jutsu: [{ ...raw.jutsu[0], tags: ['teleport'] }] })).toThrow('Invalid jutsu');
     expect(() => validateContent({ ...raw, jutsu: [raw.jutsu[0], raw.jutsu[0]] })).toThrow('Invalid jutsu');
+  });
+  it('merges data-only mod packs without allowing content id collisions', () => {
+    const merged = mergeContentPacks(content, [{ id: 'quiet-tools', schemaVersion: 1, jutsu: [{ id: 'quiet-chime', name: 'Quiet Chime', tags: ['perception'], chakraCost: 4, mastery: 0, description: 'A mod-added scouting tool.' }] }]);
+    expect(merged.jutsu.some(jutsu => jutsu.id === 'quiet-chime')).toBe(true);
+    expect(() => mergeContentPacks(content, [{ id: 'collision', schemaVersion: 1, jutsu: [content.jutsu[0]] }])).toThrow('conflicts');
   });
 });
 describe('career simulation', () => {
@@ -225,6 +231,19 @@ describe('career simulation', () => {
     s = applyCommand(s, { type: 'CHOOSE_PATH', kind: 'specialization', id: 'sealwright' }, content);
     s = applyCommand(s, { type: 'LEARN_JUTSU', id: 'cinder-seal' }, content);
     expect(s.character.knownJutsu).toContain('cinder-seal');
+  });
+  it('gives every specialization a contextual field rule and exposes build synergies and gaps', () => {
+    let s = genin(823);
+    s = applyCommand(s, { type: 'CHOOSE_PATH', kind: 'specialization', id: 'shadow-runner' }, content);
+    const readout = analyzeBuild(s, content);
+    expect(readout.roles).toContain('stealth');
+    expect(readout.synergies.some(text => text.includes('Mobilidade + furtividade'))).toBe(true);
+    s = applyCommand(s, { type: 'OFFER_MISSION' }, content);
+    s = applyCommand(s, { type: 'MISSION_DECISION', decision: 'protect' }, content);
+    s = applyCommand(s, { type: 'SET_COMBAT_PLAN', plan: 'infiltrate' }, content);
+    s = applyCommand(s, { type: 'RUN_MISSION' }, content);
+    expect(s.combat?.steps[0].text).toContain('Shadow Runner');
+    expect(s.combat?.exposure).toBe(0);
   });
   it('gives an active evolved dōjutsu one explicit, costly combat intervention', () => {
     let s = genin(821); s = { ...s, character: { ...s.character, bloodline: 'kurogane-eye', dojutsuActive: true, dojutsuStage: 1 } };
