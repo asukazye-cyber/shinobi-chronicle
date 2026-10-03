@@ -24,6 +24,11 @@ const runMission = (state: ReturnType<typeof createGame>) => {
   for (const [index, approach] of (['probe', 'commit', 'protect'] as const).entries()) s = applyCommand(s, { type: 'RESOLVE_COMBAT_BEAT', approach, jutsuId: s.character.loadout[index % s.character.loadout.length] }, content);
   return s;
 };
+const resolveTournament = (state: ReturnType<typeof createGame>) => {
+  let s = state;
+  for (const choice of ['read', 'control', 'commit'] as const) s = applyCommand(s, { type: 'RESOLVE_TOURNAMENT_ROUND', choice }, content);
+  return s;
+};
 describe('content validation', () => {
   it('rejects unknown combat tags and duplicate ids', () => {
     expect(() => validateContent({ ...raw, jutsu: [{ ...raw.jutsu[0], tags: ['teleport'] }] })).toThrow('Invalid jutsu');
@@ -160,28 +165,29 @@ describe('career simulation', () => {
   it('keeps career promotion and a final legacy behind meaningful conditions', () => {
     let s = genin(4);
     expect(() => applyCommand(s, { type: 'END_CAREER' }, content)).toThrow('Chuunin');
-    s = { ...s, stats: { ...s.stats, successes: 3 }, character: { ...s.character, reputation: 4 } };
+    s = { ...s, stats: { ...s.stats, successes: 3 }, character: { ...s.character, reputation: 4, attributes: Object.fromEntries(Object.keys(s.character.attributes).map(key => [key, 10])) as typeof s.character.attributes } };
     s = applyCommand(s, { type: 'START_REGIONAL_CIRCUIT' }, content);
     s = applyCommand(s, { type: 'RESOLVE_REGIONAL_CIRCUIT', choice: 'shield' }, content);
     s = applyCommand(s, { type: 'PROMOTE' }, content);
-    expect(s.chuuninExam).toBeDefined();
-    s = applyCommand(s, { type: 'RESOLVE_CHUUNIN_EXAM', choice: 'rescue' }, content);
+    expect(s.tournament?.kind).toBe('chuunin');
+    s = resolveTournament(s);
     expect(s.character.rank).toBe('Chuunin');
     expect(s.character.loadout).toHaveLength(4);
     s = applyCommand(s, { type: 'END_CAREER' }, content);
     expect(s.legacy?.ending).toBe('retired');
     expect(s.legacy?.biography).toContain('completou');
   });
-  it('turns the Chuunin exam into a recorded judgment, not an automatic rank check', () => {
+  it('turns the Chuunin exam into a seeded regional bracket, not an automatic rank check', () => {
     let s = genin(515);
-    s = { ...s, stats: { ...s.stats, successes: 3 }, character: { ...s.character, reputation: 4 } };
+    s = { ...s, stats: { ...s.stats, successes: 3 }, character: { ...s.character, reputation: 4, attributes: Object.fromEntries(Object.keys(s.character.attributes).map(key => [key, 10])) as typeof s.character.attributes } };
     s = applyCommand(s, { type: 'START_REGIONAL_CIRCUIT' }, content);
     s = applyCommand(s, { type: 'RESOLVE_REGIONAL_CIRCUIT', choice: 'trace' }, content);
     s = applyCommand(s, { type: 'PROMOTE' }, content);
-    s = applyCommand(s, { type: 'RESOLVE_CHUUNIN_EXAM', choice: 'analyze' }, content);
+    expect(s.tournament?.entrants).toHaveLength(3);
+    s = resolveTournament(s);
     expect(s.character.rank).toBe('Chuunin');
-    expect(s.world.secrets.some(secret => secret.includes('Exame Chuunin'))).toBe(true);
-    expect(s.chronicle.at(-1)?.text).toContain('ler o observador');
+    expect(s.world.secrets.some(secret => secret.includes('Circuito Regional'))).toBe(true);
+    expect(s.chronicle.at(-1)?.text).toContain('Chave concluída');
   });
   it('makes the regional Genin circuit establish a flexible field signature before the Chuunin exam', () => {
     let s = genin(717);
@@ -201,6 +207,16 @@ describe('career simulation', () => {
     expect(s.character.careerPath).toBe('commander');
     expect(s.offer?.rank).toBe('S');
     expect(['Seven Bridges', 'The Quiet Siege']).toContain(s.offer?.title);
+  });
+  it('uses a three-round international Jounin bracket instead of an automatic promotion', () => {
+    let s = genin(617);
+    s = { ...s, stats: { ...s.stats, successes: 8 }, character: { ...s.character, rank: 'Chuunin', reputation: 12, attributes: Object.fromEntries(Object.keys(s.character.attributes).map(key => [key, 10])) as typeof s.character.attributes, loadout: ['binding-wire', 'scouts-eye', 'stone-guard', 'mist-step'] } };
+    s = applyCommand(s, { type: 'PROMOTE' }, content);
+    expect(s.tournament?.kind).toBe('jounin');
+    expect(s.tournament?.host).toBe('Cúpula das Cinco Rotas');
+    s = resolveTournament(s);
+    expect(s.character.rank).toBe('Jounin');
+    expect(s.character.loadout).toHaveLength(5);
   });
   it('grows the base technique deck by rank while keeping bloodline, summons and modes outside it', () => {
     const s = genin(818);
