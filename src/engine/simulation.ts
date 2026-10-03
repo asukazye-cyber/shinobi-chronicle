@@ -1,4 +1,4 @@
-import type { Attribute, CareerPath, Character, Command, Content, FactionId, GameState, Injury, Jutsu, Mentor, MissionOffer, MissionRank, MissionReport, Origin, Potential, Rank, Rival, Scar, Tag, TournamentChoice, Trait } from '../domain/types';
+import type { Attribute, CareerPath, Character, CombatApproach, CombatPlan, Command, Content, FactionId, GameState, Injury, Jutsu, Mentor, MissionOffer, MissionRank, MissionReport, Origin, Potential, Rank, Rival, Scar, Tag, TournamentChoice, Trait } from '../domain/types';
 import { roll } from './rng';
 import { simulationEvents } from './events';
 
@@ -400,7 +400,34 @@ function startCombat(state: GameState, content: Content): GameState {
   const modeText = mantle ? `${bijuu?.name} alcança a Manto Ressonante; poder e inquietação sobem juntos.` : modes.sageActive ? `A disciplina Sage ${modes.sageForm ?? 'instintiva'} molda sua leitura de campo.` : '';
   const opening = { round: 0, success: planFit, text: `${planText} ${planFit ? 'A build responde ao plano escolhido.' : 'O plano pede recursos que sua build não oferece com naturalidade.'} ${specializationRule.text} ${kekkeiRule.text} ${mentorRule.text} ${modeText} ${bijuuRule.text} ${rikudo ? 'O Modo Rikudō estabiliza orbes e percepção sobre-humana, mas torna sua presença impossível de ignorar.' : ''} ${scarRule.text} ${crisisPressure ? 'A maré recente de derrotas torna a equipe e os inimigos menos previsíveis.' : ''} ${hunterPressure ? 'Caçadores conhecem sua assinatura e encurtam suas rotas de fuga.' : ''} ${prodigyPressure ? 'Sua fama precoce atrai uma resposta mais preparada.' : ''}` };
   const combat = { plan: o.plan!, round: 0, advantage, pressure, chakra: c.chakraPool + (bijuu?.cloakActive ? (mantle ? 24 : 12) : 0) - (modes.sageActive ? sageCost : 0) - (rikudo ? 18 : 0) - scarRule.chakra, exposure: Math.max(0, specializationRule.exposure), leadHistory: [], supportUsage: {}, ocularUsed: false, summonUsed: false, steps: [opening] };
-  return note({ ...state, combat }, 'combat', `Combate iniciado: plano ${o.plan}. Escolha uma técnica e uma resposta para cada troca.`);
+  return note({ ...state, combat }, 'combat', `Combate preparado: plano ${o.plan}. A simulação vai usar o kit inteiro em uma sequência coerente.`);
+}
+/** A missão é uma partida simulada: escolhas antes do apito, relatório curto depois. */
+function simulateMission(state: GameState, content: Content): GameState {
+  let next = startCombat(state, content);
+  const planApproaches: Record<CombatPlan, CombatApproach[]> = { infiltrate: ['probe', 'feint', 'commit'], contain: ['probe', 'protect', 'commit'], guard: ['protect', 'probe', 'protect'], pressure: ['commit', 'feint', 'commit'] };
+  // Um olho ativo é um compromisso feito antes do campo. Uma invocação só entra
+  // se tiver sido pedida na preparação e puder cumprir o contrato.
+  const ocularCost = 4 + next.character.dojutsuStage * 2;
+  if (next.character.dojutsuActive && next.character.dojutsuStage >= 1 && next.combat!.chakra >= ocularCost) next = applyCommand(next, { type: 'FOCUS_DOJUTSU' }, content);
+  if (next.offer?.preparation?.includes('summon') && next.character.summon && next.character.summon.bond >= 4 && next.character.summon.favor >= 2) next = applyCommand(next, { type: 'CALL_SUMMON' }, content);
+  for (const approach of planApproaches[next.combat!.plan]) {
+    const combat = next.combat;
+    if (!combat) break;
+    const situationTags: Tag[][] = [['perception', 'stealth', 'defense'], ['control', 'offense', 'defense'], ['mobility', 'control', 'offense', 'support']];
+    const approachTags: Record<CombatApproach, Tag[]> = { probe: ['perception', 'stealth', 'control'], commit: ['offense', 'mobility'], protect: ['defense', 'support', 'control'], feint: ['stealth', 'control', 'mobility'] };
+    const needed = [...situationTags[combat.round], ...approachTags[approach]];
+    const lead = next.character.loadout
+      .filter(id => !(next.character.loadout.length > 1 && combat.leadHistory.at(-1) === id))
+      .map(id => technique(content, id))
+      .sort((a, b) => {
+        const score = (jutsu: Jutsu) => jutsu.tags.filter(tag => needed.includes(tag)).length * 4 + Math.floor((next.character.mastery[jutsu.id] ?? 0) / 3) - jutsu.chakraCost / 100;
+        return score(b) - score(a) || a.id.localeCompare(b.id);
+      })[0];
+    if (!lead) throw new Error('O kit de campo está vazio; equipe técnicas antes de iniciar a missão.');
+    next = resolveCombatBeat(next, approach, lead.id, content);
+  }
+  return note(next, 'combat', 'Combate simulado em uma partida: o relatório mostra as três viradas que a sua build produziu.');
 }
 function finishMission(state: GameState, outcome: MissionReport['outcome']): GameState {
   if (!state.offer || !state.combat) throw new Error('Combate sem missão ativa.');
@@ -532,7 +559,10 @@ export function applyCommand(state: GameState, command: Command, content: Conten
   if (command.type === 'MISSION_DECISION') { if (!s.offer) throw new Error('Não há missão pendente.'); s.offer.decision = command.decision; return note(s, 'decision', command.decision === 'protect' ? 'Prioridade definida: proteger pessoas e posição.' : command.decision === 'pursue' ? 'Prioridade definida: perseguir e capturar.' : 'Prioridade definida: negociar e extrair informação.'); }
   if (command.type === 'SET_COMBAT_PLAN') { if (!s.offer || s.combat) throw new Error('O plano só pode ser definido antes do combate.'); s.offer.plan = command.plan; return note(s, 'combat', `Plano de campo definido: ${command.plan}. Ele muda as condições da abertura, não apenas números.`); }
   if (command.type === 'WITHDRAW') { if (!s.offer) throw new Error('Não há oferta para retirar.'); if (s.combat) { s.combat.steps.push({ round: s.combat.round + 1, success: false, text: 'Você ordena retirada antes que a pressão destrua a operação.' }); return finishMission(s, 'withdrawn'); } s.offer = undefined; c.reputation--; return note(s, 'mission', 'Missão retirada antes do desdobramento; confiança da vila -1.'); }
+  // RUN_MISSION remains as an engine-level compatibility seam for saves and
+  // deterministic tests. The player-facing UI uses SIMULATE_MISSION instead.
   if (command.type === 'RUN_MISSION') return startCombat(s, content);
+  if (command.type === 'SIMULATE_MISSION') return simulateMission(s, content);
   if (command.type === 'FOCUS_DOJUTSU') { const combat = s.combat; if (!combat || !s.offer) throw new Error('O foco de linhagem só pode ser usado durante combate.'); if (!c.bloodline || !c.dojutsuActive || c.dojutsuStage < 1) throw new Error('O foco exige linhagem ativa no estágio 1.'); if (combat.ocularUsed) throw new Error('O foco de linhagem já foi gasto nesta operação.'); const cost = 4 + c.dojutsuStage * 2; if (combat.chakra < cost) throw new Error('Chakra insuficiente para sustentar o foco de linhagem.'); const effect = ocularFocus(c.bloodline); const steps = [...combat.steps]; steps[0] = { ...steps[0], text: `${steps[0].text} ${effect.text}` }; s.combat = { ...combat, chakra: combat.chakra - cost, advantage: combat.advantage + effect.advantage, pressure: Math.max(0, combat.pressure + effect.pressure), ocularUsed: true, steps }; c.dojutsuStrain += 2; return note(s, 'bloodline', `${effect.text} Foco de linhagem consome ${cost} chakra e adiciona strain.`); }
   if (command.type === 'CALL_SUMMON') { const combat = s.combat, summon = c.summon; if (!combat || !s.offer) throw new Error('A invocação de campo só pode ser chamada durante combate.'); if (!summon || summon.bond < 4 || summon.favor < 2) throw new Error('A invocação exige vínculo 4 e favor 2.'); if (combat.summonUsed) throw new Error('O contrato já interveio nesta operação.'); const effect = summon.id === 'corvid-contract' ? { advantage: 1, pressure: -1, exposure: 0, text: 'Corvos espalham a leitura do campo e entregam a rota que o inimigo escondia.' } : summon.id === 'hounds-contract' ? { advantage: s.offer.decision === 'pursue' ? 3 : 1, pressure: 0, exposure: 0, text: 'Cães de caça travam o rastro; fugir deixa de ser uma saída simples.' } : summon.id === 'moth-contract' ? { advantage: 0, pressure: -1, exposure: -1, text: 'Mariposas apagam linhas de visão e cobrem a retirada ou o resgate.' } : summon.id === 'boar-contract' ? { advantage: 1, pressure: -2, exposure: 0, text: 'Javalis quebram o terreno e erguem uma posição que o inimigo não pode ignorar.' } : { advantage: 0, pressure: -2, exposure: 0, text: 'Sapos exploram o terreno e devolvem uma abertura prática, não uma vitória gratuita.' }; const steps = [...combat.steps]; steps[0] = { ...steps[0], text: `${steps[0].text} ${effect.text}` }; summon.favor -= 2; summon.bond = Math.min(12, summon.bond + 1); s.combat = { ...combat, advantage: combat.advantage + effect.advantage, pressure: Math.max(0, combat.pressure + effect.pressure), exposure: Math.max(0, combat.exposure + effect.exposure), summonUsed: true, steps }; return note(s, 'summon', `${summon.name} atende ao campo: ${effect.text} Favor restante ${summon.favor}.`); }
   if (command.type === 'RESOLVE_COMBAT_BEAT') return resolveCombatBeat(s, command.approach, command.jutsuId, content);

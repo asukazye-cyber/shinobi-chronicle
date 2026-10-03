@@ -105,5 +105,6 @@ export type Command =
   | { type: 'SET_COMBAT_PLAN'; plan: CombatPlan }
   | { type: 'WITHDRAW' }
   | { type: 'RUN_MISSION' }
+  | { type: 'SIMULATE_MISSION' }
   | { type: 'RESOLVE_COMBAT_BEAT'; approach: CombatApproach; jutsuId: string }
   | { type: 'END_CAREER' };

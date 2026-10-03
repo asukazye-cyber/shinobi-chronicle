@@ -144,15 +144,14 @@ describe('career simulation', () => {
     if (s.lastReport?.outcome === 'success') expect(s.lastReport.reward).toBeGreaterThan(0);
     if (s.lastReport?.outcome === 'failure') expect(s.lastReport.injury?.days).toBeGreaterThan(0);
   });
-  it('requires a plan, then lets the player resolve each combat exchange with a selected jutsu', () => {
+  it('requires a plan, then simulates a complete match from the equipped kit', () => {
     let s = genin(56); s = applyCommand(s, { type: 'OFFER_MISSION' }, content); s = applyCommand(s, { type: 'MISSION_DECISION', decision: 'protect' }, content);
-    expect(() => applyCommand(s, { type: 'RUN_MISSION' }, content)).toThrow('plano');
+    expect(() => applyCommand(s, { type: 'SIMULATE_MISSION' }, content)).toThrow('plano');
     s = applyCommand(s, { type: 'SET_COMBAT_PLAN', plan: 'guard' }, content);
-    s = applyCommand(s, { type: 'RUN_MISSION' }, content);
-    expect(s.combat?.round).toBe(0);
-    s = applyCommand(s, { type: 'RESOLVE_COMBAT_BEAT', approach: 'protect', jutsuId: 'binding-wire' }, content);
-    expect(s.combat?.round).toBe(1);
-    expect(s.combat?.steps.at(-1)?.text).toContain('posição');
+    s = applyCommand(s, { type: 'SIMULATE_MISSION' }, content);
+    expect(s.combat).toBeUndefined();
+    expect(s.lastReport?.steps).toHaveLength(4);
+    expect(s.lastReport?.steps.slice(1).some(step => step.text.includes('posição'))).toBe(true);
   });
   it('uses the equipped kit as a sequence and prevents repeating the same lead immediately', () => {
     let s = genin(57); s = applyCommand(s, { type: 'OFFER_MISSION' }, content); s = applyCommand(s, { type: 'MISSION_DECISION', decision: 'protect' }, content); s = applyCommand(s, { type: 'SET_COMBAT_PLAN', plan: 'contain' }, content); s = applyCommand(s, { type: 'RUN_MISSION' }, content);
