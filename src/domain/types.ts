@@ -24,6 +24,8 @@ export type Origin = { academyMemory: string; latentTag: Tag; description: strin
 export type RivalStance = 'competitive' | 'respectful' | 'hostile' | 'allied';
 export type Rival = { name: string; style: string; affinity: string; preferredTag: Tag; rank: Rank; reputation: number; rivalry: number; stage: 0 | 1 | 2 | 3 | 4; stance: RivalStance; lastEncounterDay: number; studiedStages: number[]; memory: string };
 export type PreparationMethod = 'intel' | 'gear' | 'team' | 'summon' | 'seal' | 'mentor';
+/** A compact, consequential way to spend time between operations. */
+export type VillageActivity = 'practice' | 'listen' | 'mentor' | 'patrol';
 export type TraitId = 'neutral' | 'disciplined' | 'instinctive' | 'resilient' | 'precise' | 'fierce' | 'contemplative';
 export type Trait = { id: TraitId; name: string; description: string; modifiers: Partial<Record<Attribute, number>> };
 export type Potential = { profile: 'prodigy' | 'ordinary' | 'late-bloomer'; breakthrough: boolean; specialty?: Attribute; blindSpot?: Attribute };
@@ -44,7 +46,7 @@ export type FactionId = 'eclipse-covenant' | 'red-hands' | 'hunter-directorate' 
 export type FactionState = { id: FactionId; name: string; agenda: string; standing: number; heat: number };
 export type CareerCrisis = { defeatStreak: number; lastSetback?: string; warrant?: string };
 export type MissingNinState = { reason: string; wantedLevel: 1 | 2 | 3; huntersAlerted: boolean };
-export type WorldState = { season: number; borderTension: number; councilTrust: number; rumors: string[]; secrets: string[]; storyFlags: string[]; factions: FactionState[]; careerCrisis: CareerCrisis; missingNin?: MissingNinState };
+export type WorldState = { season: number; borderTension: number; councilTrust: number; rumors: string[]; secrets: string[]; storyFlags: string[]; factions: FactionState[]; careerCrisis: CareerCrisis; /** Leads gathered in the village, spent by the next mission. */ localIntel?: number; missingNin?: MissingNinState };
 export type NarrativeMoment = { npcId: string; prompt: string; choices: ('support' | 'challenge' | 'expose')[] };
 export type MissionChoice = 'protect' | 'pursue' | 'negotiate';
 export type CombatPlan = 'infiltrate' | 'contain' | 'guard' | 'pressure';
@@ -61,6 +63,7 @@ export type Command =
   | { type: 'SET_TRAINING_FOCUS'; attribute: Attribute }
   | { type: 'TRAIN'; attribute: Attribute }
   | { type: 'REST' }
+  | { type: 'SPEND_VILLAGE_DAY'; activity: VillageActivity }
   | { type: 'RESOLVE_ACADEMY_INTRO'; choice: AcademyIntroChoice }
   | { type: 'GRADUATE' }
   | { type: 'PROMOTE' }

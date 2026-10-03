@@ -122,6 +122,21 @@ describe('career simulation', () => {
   it('round-trips a versioned save without changing the chronicle', () => {
     const state = genin(13); expect(decodeSave(encodeSave(state))).toEqual(state);
   });
+  it('turns optional village time into concrete preparation, mastery, bonds and civic consequences', () => {
+    let s = genin(93); const first = s.character.loadout[0], day = s.character.day;
+    s = applyCommand(s, { type: 'SPEND_VILLAGE_DAY', activity: 'practice' }, content);
+    expect(s.character.day).toBe(day + 1);
+    expect(s.character.mastery[first]).toBeGreaterThanOrEqual(1);
+    s = applyCommand(s, { type: 'SPEND_VILLAGE_DAY', activity: 'listen' }, content);
+    expect(s.world.localIntel).toBe(1);
+    const mentorBond = s.character.mentor.bond;
+    s = applyCommand(s, { type: 'SPEND_VILLAGE_DAY', activity: 'mentor' }, content);
+    expect(s.character.mentor.bond).toBe(mentorBond + 1);
+    const tension = s.world.borderTension;
+    s = applyCommand(s, { type: 'SPEND_VILLAGE_DAY', activity: 'patrol' }, content);
+    expect(s.world.borderTension).toBe(Math.max(0, tension - 1));
+    expect(s.chronicle.at(-1)?.type).toBe('village');
+  });
   it('migrates saves made before Sage disciplines and Resonant Mantle', () => {
     const legacy = JSON.parse(encodeSave(genin(14)));
     delete legacy.character.modes.sageForms;
