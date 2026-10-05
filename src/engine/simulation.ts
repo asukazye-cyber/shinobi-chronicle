@@ -94,8 +94,13 @@ function spendVillageDay(state: GameState, activity: VillageActivity, content: C
   if (activity === 'practice') {
     const jutsu = [...c.loadout].map(id => technique(content, id)).sort((a, b) => (c.mastery[a.id] ?? 0) - (c.mastery[b.id] ?? 0) || a.id.localeCompare(b.id))[0];
     if (!jutsu) throw new Error('Equipe técnicas antes de praticar um kit de campo.');
+    // Practice is useful for keeping a kit sharp, but field application is what
+    // turns a routine into mastery. This is a soft, diegetic plateau rather than
+    // an action quota: every completed operation raises the point worth drilling.
+    const fieldProof = Math.max(2, state.stats.missions + 2);
+    if ((c.mastery[jutsu.id] ?? 0) >= fieldProof) return note(next, 'village', `${jutsu.name} já responde ao exercício conhecido. O próximo salto de domínio pede uma missão nova; o dia serviu para manter o kit afiado.`);
     c.mastery = { ...c.mastery, [jutsu.id]: (c.mastery[jutsu.id] ?? 0) + 1 };
-    return note(next, 'village', `No pátio de ${c.village}, você lapida ${jutsu.name}. Domínio ${c.mastery[jutsu.id]}; um dia foi investido no kit, não em atributos.`);
+    return note(next, 'village', `No pátio de ${c.village}, você lapida ${jutsu.name}. Domínio ${c.mastery[jutsu.id]}/${fieldProof}; um dia foi investido no kit, não em atributos.`);
   }
   if (activity === 'listen') {
     let factionIndex: number, rng: number; [factionIndex, rng] = roll(next.rngState, next.world.factions.length);
@@ -108,10 +113,14 @@ function spendVillageDay(state: GameState, activity: VillageActivity, content: C
     const sensei = c.relationships.find(relationship => relationship.id === 'sensei'); if (sensei) sensei.bond = c.mentor.bond;
     return note(next, 'village', `Uma conversa curta com ${c.mentor.name} reforça a doutrina ${c.mentor.doctrine}. Vínculo ${c.mentor.bond}; lições decisivas continuam sendo escolhas separadas.`);
   }
-  c.ryo += 12; c.honor += 1; c.factionTrust.village += 1;
+  const activeTension = next.world.borderTension > 0;
+  c.ryo += activeTension ? 12 : 3;
+  if (activeTension) { c.honor += 1; c.factionTrust.village += 1; }
   next.world.borderTension = Math.max(0, next.world.borderTension - 1);
   next.world.rumors = [...next.world.rumors.slice(-3), `A ronda de ${c.name} manteve um distrito de ${c.village} calmo por mais uma noite.`];
-  return note(next, 'village', `Você assume uma ronda local: 12 ryo, honra e confiança da vila +1; tensão de fronteira -1. Dois dias passam.`);
+  return note(next, 'village', activeTension
+    ? 'Você assume uma ronda local: 12 ryo, honra e confiança da vila +1; tensão de fronteira -1. Dois dias passam.'
+    : 'A fronteira está calma. Você cobre uma ronda curta: 3 ryo e uma noite tranquila, sem transformar paz em farm de honra. Dois dias passam.');
 }
 export function createGame(name: string, seed = 1337): GameState {
   const stats = { missions: 0, successes: 0, partials: 0, failures: 0, trainings: 0, relationshipsDeepened: 0, ryoEarned: 0, daysServed: 0, highestMission: 'E' as MissionRank };
@@ -470,8 +479,24 @@ function worldArc(state: GameState, rank: MissionRank): ArcOffer | undefined {
   if (rankIndex[rank] >= rankIndex.S && c.rank === 'Jounin' && state.world.secrets.length >= 5 && !flags.includes('world:celestial')) return { id: 'world:celestial', entry: ['Visitante além do Véu', 'Responder a uma ameaça celestial que trata a vila como um recurso, não como um povo.', 'A presença oferece uma saída individual em troca de acesso ao que a terra ainda guarda.', 1500, 'Crise S: ameaça celestial'] };
   return undefined;
 }
+/** Career identity is expressed through ordinary offers, never through a separate management mode. */
+function careerArc(state: GameState, rank: MissionRank): ArcOffer | undefined {
+  const c = state.character, flags = state.world.storyFlags, atLeastA = rankIndex[rank] >= rankIndex.A, atLeastS = rankIndex[rank] >= rankIndex.S;
+  // Appointment stories are late-career material. Earlier high-rank work still
+  // belongs to personal lineage arcs, faction consequences and normal operations.
+  if (!c.careerPath || !atLeastA || state.stats.successes < 18) return undefined;
+  if (c.careerPath === 'anbu' && !flags.includes('career:anbu:mirror')) return { id: 'career:anbu:mirror', entry: ['Máscara no Espelho', 'Extraia uma agente que usa seu próprio codinome como cobertura sem expor quem ainda trabalha nas sombras.', 'O relatório foi escrito para que a verdade pareça uma armadilha e a armadilha pareça uma verdade.', 790, 'Operação ANBU: identidade e sigilo'] };
+  if (c.careerPath === 'sensei' && !flags.includes('career:sensei:line')) return { id: 'career:sensei:line', entry: ['A Linha que Ensina', 'Retire uma equipe inexperiente de uma operação que eles insistem em terminar para provar que merecem ficar.', 'A ordem mais segura pode quebrar a confiança; a ordem mais dura pode quebrar alguém.', 760, 'Operação Sensei: responsabilidade'] };
+  if (c.careerPath === 'commander' && !flags.includes('career:commander:signal')) return { id: 'career:commander:signal', entry: ['Sinal para Ninguém', 'Escolha quais rotas recebem reforço quando três vilas interpretam o mesmo aviso como prioridade própria.', 'Você pode concentrar força, distribuir risco ou revelar uma negociação ainda secreta.', 820, 'Operação de Comando: critério sob pressão'] };
+  if (c.careerPath === 'rogue' && !flags.includes('career:rogue:ledger')) return { id: 'career:rogue:ledger', entry: ['O Livro das Recompensas', 'Interrompa uma caçada que vende informações de crianças de vila como se fossem alvos de contrato.', 'Destruir o livro apaga provas; entregar o livro entrega também quem confiou em você.', 750, 'Operação Missing-nin: liberdade e consequência'] };
+  if (atLeastS && c.careerPath === 'anbu' && flags.includes('career:anbu:mirror') && !flags.includes('career:anbu:threshold')) return { id: 'career:anbu:threshold', entry: ['A Porta sem Registro', 'Decida se uma verdade capaz de desestabilizar alianças deve permanecer fora de qualquer arquivo oficial.', 'Sua máscara protege o sigilo, mas não escolhe por você quem vai carregar o custo.', 1180, 'Crise ANBU: verdade sem dono'] };
+  if (atLeastS && c.careerPath === 'sensei' && flags.includes('career:sensei:line') && !flags.includes('career:sensei:threshold')) return { id: 'career:sensei:threshold', entry: ['Depois da Aula', 'Guie uma nova geração num campo onde a vitória rápida ensinaria exatamente a lição errada.', 'Todos observam sua decisão, inclusive quem já está pronto para discordar dela.', 1120, 'Crise Sensei: legado em campo'] };
+  if (atLeastS && c.careerPath === 'commander' && flags.includes('career:commander:signal') && !flags.includes('career:commander:threshold')) return { id: 'career:commander:threshold', entry: ['Ordem de Amanhecer', 'Sustente uma trégua frágil enquanto oficiais de ambos os lados tentam forçar uma vitória que você não autorizou.', 'Comandar não é escolher tudo; é responder pelo que sua ordem torna possível.', 1210, 'Crise de Comando: autoridade'] };
+  if (atLeastS && c.careerPath === 'rogue' && flags.includes('career:rogue:ledger') && !flags.includes('career:rogue:threshold')) return { id: 'career:rogue:threshold', entry: ['Ninguém Possui Seu Nome', 'Proteja uma rota de fuga sem permitir que a liberdade vire licença para repetir a violência que o caçou.', 'A vila oferece perdão condicional; o submundo oferece poder sem pergunta.', 1150, 'Crise Missing-nin: nome e escolha'] };
+  return undefined;
+}
 function offerMission(state: GameState): GameState {
-  const rank = missionRank(state.character, state.stats), path = state.character.careerPath, personal = personalArc(state, rank), arc = worldArc(state, rank) ?? personal ?? factionArc(state, rank); const pool = path && careerOperations[path]?.[rank] ? careerOperations[path][rank]! : offers[rank]; let rng = state.rngState, pick: number, variance: number; [pick, rng] = roll(rng, pool.length); [variance, rng] = roll(rng, 4);
+  const rank = missionRank(state.character, state.stats), path = state.character.careerPath, personal = personalArc(state, rank), arc = worldArc(state, rank) ?? personal ?? factionArc(state, rank) ?? careerArc(state, rank); const pool = path && careerOperations[path]?.[rank] ? careerOperations[path][rank]! : offers[rank]; let rng = state.rngState, pick: number, variance: number; [pick, rng] = roll(rng, pool.length); [variance, rng] = roll(rng, 4);
   const [title, objective, rawIntel, reward, statedRisk] = arc?.entry ?? pool[pick]; const factionId = arc?.id.startsWith('faction:') ? arc.id.split(':')[1] as FactionId : missionFaction(state, rank); const faction = state.world.factions.find(item => item.id === factionId); const intel = faction ? `${rawIntel} Sinais ligam a crise ao ${faction.name}, que ${faction.agenda}.` : rawIntel; const base = { E: 3, D: 5, C: 8, B: 11, A: 14, S: 18 }[rank];
   const dilemma = rank === 'D' ? 'O courier pode estar ferido; seguir os rastros pode expor civis.' : rank === 'C' ? 'O objetivo e uma testemunha vulnerável se separam no ponto de contato.' : rank === 'S' ? 'Nenhuma escolha preserva tudo: pessoas, segredo e estabilidade política entram em colisão.' : 'A conclusão eficiente pode ferir uma relação política que a vila ainda precisa.';
   const offer: MissionOffer = { id: `${rank}-${state.character.day}-${rng}`, rank, title, objective, intel, statedRisk, dilemma, arcId: arc?.id, factionId, reward: reward + variance * 15, hiddenThreat: base + variance + Number(Boolean(arc)), preparation: [] };
@@ -542,6 +567,14 @@ function finishMission(state: GameState, outcome: MissionReport['outcome']): Gam
   const mastery = { ...c.mastery }; c.loadout.forEach(id => mastery[id] = (mastery[id] ?? 0) + 1);
   const stats = { ...state.stats, missions: state.stats.missions + 1, successes: state.stats.successes + Number(outcome === 'success'), partials: state.stats.partials + Number(outcome === 'partial'), failures: state.stats.failures + Number(outcome === 'failure' || outcome === 'withdrawn'), ryoEarned: state.stats.ryoEarned + reward, highestMission: rankIndex[o.rank] > rankIndex[state.stats.highestMission] ? o.rank : state.stats.highestMission, daysServed: state.stats.daysServed + 3 };
   const team = { ...state.team, cohesion: Math.max(0, Math.min(30, state.team.cohesion + (prep.has('team') && outcome === 'success' ? 2 : outcome === 'failure' ? -2 : 0))), lastMission: o.title };
+  // Contacts only move when they were deliberately brought into the operation.
+  // They support the protagonist's story; they never demand a parallel social loop.
+  const deployedIds = prep.has('team') ? new Set(state.team.memberIds) : new Set<string>();
+  const npcs = state.npcs.map(npc => !deployedIds.has(npc.id) ? npc : {
+    ...npc,
+    bond: Math.max(-20, Math.min(50, npc.bond + (outcome === 'success' ? 2 : outcome === 'partial' ? 1 : -1))),
+    memory: outcome === 'success' ? `esteve ao seu lado em ${o.title}; a leitura de campo passou a ser uma memória compartilhada` : `viu como ${o.title} cobrou um preço da equipe`
+  });
   const nextBijuu = bijuu ? { ...bijuu, cloakActive: false, mantleActive: false, unrest: Math.max(0, bijuu.unrest + (bijuu.cloakActive ? 1 + Number(bijuu.mantleActive) + (modes.rikudoActive ? 3 : 0) : 0)), synchronization: Math.min(20, bijuu.synchronization + (bijuu.approach === 'cooperate' && outcome === 'success' ? 1 : 0)) } : undefined;
   const pathHonor = c.careerPath === 'sensei' && o.decision === 'protect' && outcome !== 'failure' && outcome !== 'withdrawn' ? 2 : c.careerPath === 'commander' && o.rank === 'S' && outcome === 'success' ? 2 : 0;
   const pathNotoriety = c.careerPath === 'rogue' && outcome !== 'failure' && outcome !== 'withdrawn' ? 2 : 0;
@@ -554,7 +587,7 @@ function finishMission(state: GameState, outcome: MissionReport['outcome']): Gam
     const heat = Math.max(0, faction.heat + (outcome === 'success' ? 1 : 2) + (state.world.missingNin && faction.id === 'hunter-directorate' ? 1 : 0));
     return { ...faction, standing, heat };
   });
-  let next: GameState = { ...state, combat: undefined, world: { ...state.world, localIntel: 0, borderTension: Math.max(0, state.world.borderTension + (outcome === 'success' ? -1 - (c.careerPath === 'commander' && o.rank === 'S' ? 1 : 0) : 1)), councilTrust: state.world.councilTrust + reputation + (c.careerPath === 'commander' && outcome === 'success' ? 1 : 0), rumors: outcome === 'success' ? [...state.world.rumors.slice(-3), `${o.title} terminou sem virar crise aberta.`] : [...state.world.rumors.slice(-3), `O revés em ${o.title} alimenta dúvidas sobre sua próxima operação.`], secrets: [...state.world.secrets, ...pathSecret], factions, careerCrisis: { defeatStreak, lastSetback: setback ? o.title : state.world.careerCrisis.lastSetback, warrant } }, team, stats, offer: undefined, lastReport: report, character: { ...c, modes: { ...modes, sageActive: false, openGates: 0, rikudoActive: false }, bijuu: nextBijuu, chakraPool: Math.max(0, Math.min(c.attributes.stamina * 10 + c.attributes.chakraControl * 2, combat.chakra)), day: c.day + 3, dojutsuStrain: c.dojutsuStrain + (c.dojutsuActive ? 1 : 0), health: Math.max(0, c.health - (injury?.severity ?? 0) * 14 - modes.openGates * 6 - (modes.rikudoActive ? 12 : 0)), ryo: c.ryo + reward, reputation: c.reputation + reputation, honor: c.honor + (outcome === 'success' ? 1 : 0) + (o.decision === 'protect' ? 1 : 0) + pathHonor, notoriety: Math.max(0, c.notoriety + (o.rank === 'B' || o.rank === 'A' || o.rank === 'S' || o.decision === 'pursue' || bijuu?.cloakActive || modes.rikudoActive || defeatStreak >= 3 ? 1 : 0) + pathNotoriety), factionTrust: { village: c.factionTrust.village + reputation, underworld: c.factionTrust.underworld + (o.decision === 'negotiate' ? 2 : setback ? 1 : 0) + (c.careerPath === 'rogue' && outcome === 'success' ? 1 : 0) }, injury, mastery } };
+  let next: GameState = { ...state, npcs, combat: undefined, world: { ...state.world, localIntel: 0, borderTension: Math.max(0, state.world.borderTension + (outcome === 'success' ? -1 - (c.careerPath === 'commander' && o.rank === 'S' ? 1 : 0) : 1)), councilTrust: state.world.councilTrust + reputation + (c.careerPath === 'commander' && outcome === 'success' ? 1 : 0), rumors: outcome === 'success' ? [...state.world.rumors.slice(-3), `${o.title} terminou sem virar crise aberta.`] : [...state.world.rumors.slice(-3), `O revés em ${o.title} alimenta dúvidas sobre sua próxima operação.`], secrets: [...state.world.secrets, ...pathSecret], factions, careerCrisis: { defeatStreak, lastSetback: setback ? o.title : state.world.careerCrisis.lastSetback, warrant } }, team, stats, offer: undefined, lastReport: report, character: { ...c, modes: { ...modes, sageActive: false, openGates: 0, rikudoActive: false }, bijuu: nextBijuu, chakraPool: Math.max(0, Math.min(c.attributes.stamina * 10 + c.attributes.chakraControl * 2, combat.chakra)), day: c.day + 3, dojutsuStrain: c.dojutsuStrain + (c.dojutsuActive ? 1 : 0), health: Math.max(0, c.health - (injury?.severity ?? 0) * 14 - modes.openGates * 6 - (modes.rikudoActive ? 12 : 0)), ryo: c.ryo + reward, reputation: c.reputation + reputation, honor: c.honor + (outcome === 'success' ? 1 : 0) + (o.decision === 'protect' ? 1 : 0) + pathHonor, notoriety: Math.max(0, c.notoriety + (o.rank === 'B' || o.rank === 'A' || o.rank === 'S' || o.decision === 'pursue' || bijuu?.cloakActive || modes.rikudoActive || defeatStreak >= 3 ? 1 : 0) + pathNotoriety), factionTrust: { village: c.factionTrust.village + reputation, underworld: c.factionTrust.underworld + (o.decision === 'negotiate' ? 2 : setback ? 1 : 0) + (c.careerPath === 'rogue' && outcome === 'success' ? 1 : 0) }, injury, mastery } };
   if (o.arcId && outcome === 'success') {
     const arcText = `Arco concluído: ${o.title}. A história dessa escolha permanece na sua crônica.`;
     next = { ...next, world: { ...next.world, storyFlags: [...new Set([...next.world.storyFlags, o.arcId])], secrets: [...next.world.secrets, arcText], rumors: [...next.world.rumors.slice(-3), `${o.title} mudou a forma como a vila fala sobre você.`] }, character: { ...next.character, honor: next.character.honor + 1, reputation: next.character.reputation + 1 } };

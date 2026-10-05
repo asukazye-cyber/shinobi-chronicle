@@ -47,9 +47,17 @@
 - First authored technique-tree slice: prerequisite-validated advanced jutsu branches (restraint, sentinel, mobility and sealwright) now require their parent techniques and, when relevant, specialization. First real dōjutsu combat technique layer: one lineage-specific focus per mission with chakra/strain cost and different field rules for Kurogane, Lumen and Ashen.
 - Automated tests for validation, event publication/logging, determinism, save/load, progression, promotion/legacy, seasonal world simulation, risk/reward, and combat explanations.
 
+## Latest polish pass
+
+- **Authored careers:** ANBU, Sensei, Commander and Missing-nin each now receive an authored A-rank identity operation and a later S-rank turning point, offered and resolved as ordinary missions. This broadens career variety without a separate campaign screen or management mode.
+- **Economy and progression:** village practice has a contextual field-proof plateau (completed missions raise it), so safe repetition cannot replace operations. Patrol pay, honor and village trust apply only while it solves genuine border tension; a calm frontier gives only a token payment. Neither rule adds an action quota or daily checklist.
+- **Tournament readability:** the active tournament presents a compact graphical player route (Quartas → Semifinal → Final), marking completed/current/future encounters and showing opponent OVR. It does not invent off-screen results for matches the simulation does not actually resolve.
+- **Modpacks:** the data-only contract now has a browser import/removal surface in the collapsed Build catalogue. JSON packs are schema-checked, merged only after validation, stored locally and cannot supply executable code. The README includes a minimal valid pack.
+- **NPC scope:** deployed contacts remember the actual mission result and their bond shifts only when the player deliberately prepares with the team. This reinforces field support without schedules or a parallel NPC simulator.
+
 ## Designed, not implemented
 
-Full NPC schedules and independent lives beyond seasonal availability; teams with tactics, conflict and member departure; more S-rank mission arcs; additional dōjutsu technique trees; summon encounters and contract requests; additional Bijū transformations/content; additional Sage/Gates forms; more Kekkei Genkai families and clan-specific authored arcs; multi-operation faction allegiances and multi-village politics beyond the current contract/heat model; longer authored narrative chains beyond the current three-stage personal operations; mentor turning-point scenes beyond the current doctrine/lesson model; crafting and broader economy/research; browser UI for importing and ordering validated mod packs; and save migrations beyond v1.
+Full NPC schedules and independent lives beyond seasonal availability; teams with tactics, conflict and member departure; more S-rank mission arcs; additional dōjutsu technique trees; summon encounters and contract requests; additional Bijū transformations/content; additional Sage/Gates forms; more Kekkei Genkai families and clan-specific authored arcs; multi-operation faction allegiances and multi-village politics beyond the current contract/heat model; longer authored narrative chains beyond the current three-stage personal operations; mentor turning-point scenes beyond the current doctrine/lesson model; crafting and broader economy/research; ordering/sharing of validated mod packs; and save migrations beyond v1.
 
 ## Decisions
 

@@ -137,6 +137,17 @@ describe('career simulation', () => {
     expect(s.world.borderTension).toBe(Math.max(0, tension - 1));
     expect(s.chronicle.at(-1)?.type).toBe('village');
   });
+  it('lets village practice plateau naturally and ends patrol farming when the frontier is calm', () => {
+    let s = genin(930); const practiced = s.character.loadout[0];
+    s = applyCommand(s, { type: 'SPEND_VILLAGE_DAY', activity: 'practice' }, content);
+    s = applyCommand(s, { type: 'SPEND_VILLAGE_DAY', activity: 'practice' }, content);
+    expect(s.character.mastery[practiced]).toBe(2);
+    const ryo = s.character.ryo, honor = s.character.honor;
+    s = { ...s, world: { ...s.world, borderTension: 0 } };
+    s = applyCommand(s, { type: 'SPEND_VILLAGE_DAY', activity: 'patrol' }, content);
+    expect(s.character.ryo).toBe(ryo + 3);
+    expect(s.character.honor).toBe(honor);
+  });
   it('creates a deterministic competitive roster and writes an annual OVR report without using OVR as combat resolution', () => {
     let s = genin(941); const assessment = assessCharacter(s, content);
     expect(s.competitive?.rosters.Genin).toHaveLength(10);
@@ -458,6 +469,15 @@ describe('career simulation', () => {
     expect(s.offer?.rank).toBe('S');
     expect(s.offer?.arcId).toBe('affinity:sand-style:final');
     expect(s.offer?.title).toContain('Legacy of sand-style');
+  });
+  it('gives each selected career authored A and S operations through the ordinary mission flow', () => {
+    let s = genin(512);
+    s = { ...s, stats: { ...s.stats, successes: 18 }, character: { ...s.character, rank: 'Jounin', careerPath: 'anbu', loadout: ['binding-wire', 'scouts-eye', 'stone-guard', 'mist-step', 'warding-palm'], knownJutsu: ['binding-wire', 'scouts-eye', 'stone-guard', 'mist-step', 'warding-palm'] } };
+    s = applyCommand(s, { type: 'OFFER_MISSION' }, content);
+    expect(s.offer?.arcId).toBe('career:anbu:mirror');
+    s = { ...s, offer: undefined, world: { ...s.world, storyFlags: ['career:anbu:mirror'] } };
+    s = applyCommand(s, { type: 'OFFER_MISSION' }, content);
+    expect(s.offer?.arcId).toBe('career:anbu:threshold');
   });
   it('gives each dōjutsu lineage its own three-stage operation rather than an affinity reskin', () => {
     let s = genin(514);
