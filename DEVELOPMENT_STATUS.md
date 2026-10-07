@@ -49,6 +49,9 @@
 
 ## Latest polish pass
 
+- **Content-depth pass:** the base library now has 138 techniques, including nine new utility, rescue, deception, movement, sealing and coordinated-field branches. B/A/S mission pools were expanded, and ANBU, Sensei and Commander now have B/A/S operation pools rather than only endgame contracts.
+- **Personal-path pass:** each of the ten Bijū now brings a distinct three-stage authored operation rather than sharing generic seal text. Stone, Storm and Veil Sage expressions use their own authored framing, and the Gates now have a full B → A → S personal arc about power, restraint and survival.
+- **Faction consequence pass:** the first Hunter Directorate, Eclipse Covenant, Red Hands and Ashen Lotus operations now also record a priority-specific political outcome; later chapters retain their stronger faction resolution effects.
 - **Flow/UI clarity:** the focused journey screen now surfaces one contextual “Próxima decisão” card and mission-readiness chips (priority, plan and optional preparation). The player can understand the current state without opening a new menu or reading every panel.
 - **Authored careers:** ANBU, Sensei, Commander and Missing-nin each now receive an authored A-rank identity operation and a later S-rank turning point, offered and resolved as ordinary missions. This broadens career variety without a separate campaign screen or management mode.
 - **Economy and progression:** village practice has a contextual field-proof plateau (completed missions raise it), so safe repetition cannot replace operations. Patrol pay, honor and village trust apply only while it solves genuine border tension; a calm frontier gives only a token payment. Neither rule adds an action quota or daily checklist.

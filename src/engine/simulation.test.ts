@@ -39,6 +39,11 @@ describe('content validation', () => {
     expect(merged.jutsu.some(jutsu => jutsu.id === 'quiet-chime')).toBe(true);
     expect(() => mergeContentPacks(content, [{ id: 'collision', schemaVersion: 1, jutsu: [content.jutsu[0]] }])).toThrow('conflicts');
   });
+  it('keeps a broad authored technique library with utility branches beyond direct offense', () => {
+    expect(content.jutsu.length).toBeGreaterThanOrEqual(138);
+    expect(content.jutsu.find(jutsu => jutsu.id === 'hostage-thread')?.tags).toEqual(expect.arrayContaining(['support', 'control']));
+    expect(content.jutsu.find(jutsu => jutsu.id === 'horizon-needle')?.minimumRank).toBe('A');
+  });
 });
 describe('career simulation', () => {
   it('writes a durable chronicle and publishes the corresponding domain event', () => {
@@ -248,7 +253,7 @@ describe('career simulation', () => {
     s = applyCommand(s, { type: 'OFFER_MISSION' }, content);
     expect(s.character.careerPath).toBe('commander');
     expect(s.offer?.rank).toBe('S');
-    expect(['Seven Bridges', 'The Quiet Siege']).toContain(s.offer?.title);
+    expect(['Sete Pontes', 'O Cerco Silencioso', 'Mapa das Ausências']).toContain(s.offer?.title);
   });
   it('uses a three-round international Jounin bracket instead of an automatic promotion', () => {
     let s = genin(617);
@@ -425,7 +430,7 @@ describe('career simulation', () => {
     expect(s.character.summon?.favor).toBe(0);
   });
   it('loads the expanded catalogue and makes Kekkei Genkai techniques change field rules', () => {
-    expect(content.jutsu).toHaveLength(129);
+    expect(content.jutsu).toHaveLength(138);
     expect(content.dojutsu.map(path => path.id)).toEqual(expect.arrayContaining(['kurogane-eye', 'lumen-eye', 'ashen-eye', 'sharingan', 'byakugan', 'rinnegan', 'tenseigan', 'ketsuryugan', 'jogan', 'kagura-eye']));
     expect(content.bijuu.map(beast => beast.id)).toEqual(['shukaku', 'matatabi', 'isobu', 'son-goku', 'kokuo', 'saiken', 'chomei', 'gyuki', 'kurama', 'juubi']);
     expect(content.bloodlines.map(path => path.id)).toEqual(expect.arrayContaining(['wood-release', 'ice-release', 'crystal-release', 'yin-yang-release', 'sand-style', 'magnet-release', 'lava-release', 'boil-release', 'scorch-release', 'storm-release', 'explosion-release', 'metal-release', 'fire-style', 'water-style', 'wind-style', 'earth-style', 'lightning-style']));
@@ -479,6 +484,18 @@ describe('career simulation', () => {
     s = applyCommand(s, { type: 'OFFER_MISSION' }, content);
     expect(s.offer?.arcId).toBe('career:anbu:threshold');
   });
+  it('makes every Bijū route narratively distinct and gives Gates their own three-stage arc', () => {
+    let bijuu = genin(515);
+    bijuu = { ...bijuu, stats: { ...bijuu.stats, successes: 6 }, character: { ...bijuu.character, rank: 'Chuunin', loadout: ['binding-wire', 'scouts-eye', 'stone-guard', 'mist-step'], knownJutsu: ['binding-wire', 'scouts-eye', 'stone-guard', 'mist-step'], bijuu: { id: 'shukaku', name: 'Shukaku, o Ichibi', trust: 5, respect: 1, control: 3, synchronization: 0, unrest: 2, cloakActive: false } } };
+    bijuu = applyCommand(bijuu, { type: 'OFFER_MISSION' }, content);
+    expect(bijuu.offer?.arcId).toBe('bijuu:first');
+    expect(bijuu.offer?.title).toContain('Deserto que Escuta');
+    let gates = genin(516);
+    gates = { ...gates, stats: { ...gates.stats, successes: 6 }, character: { ...gates.character, rank: 'Chuunin', loadout: ['binding-wire', 'scouts-eye', 'stone-guard', 'mist-step'], knownJutsu: ['binding-wire', 'scouts-eye', 'stone-guard', 'mist-step'], modes: { ...gates.character.modes, gateTraining: 2 } } };
+    gates = applyCommand(gates, { type: 'OFFER_MISSION' }, content);
+    expect(gates.offer?.arcId).toBe('gates:first');
+    expect(gates.offer?.title).toBe('O Corpo como Promessa');
+  });
   it('gives each dōjutsu lineage its own three-stage operation rather than an affinity reskin', () => {
     let s = genin(514);
     s = { ...s, stats: { ...s.stats, successes: 14 }, character: { ...s.character, rank: 'Jounin', bloodline: 'kurogane-eye', dojutsuStage: 1, dojutsuInsight: 2, loadout: ['binding-wire', 'scouts-eye', 'stone-guard', 'mist-step', 'warding-palm'], knownJutsu: ['binding-wire', 'scouts-eye', 'stone-guard', 'mist-step', 'warding-palm'] } };
@@ -520,6 +537,19 @@ describe('career simulation', () => {
     expect(s.offer?.arcId).toBe('faction:eclipse-covenant:terms');
     expect(s.offer?.title).toBe('O Preço do Eclipse');
     expect(s.offer?.intel).toContain('Pacto do Eclipse');
+  });
+  it('makes the first faction contract write a decision-specific political consequence', () => {
+    let s = genin(906);
+    s = { ...s, stats: { ...s.stats, successes: 6 }, world: { ...s.world, storyFlags: ['affinity:sand-style:first'], factions: s.world.factions.map(faction => faction.id === 'eclipse-covenant' ? { ...faction, standing: 2 } : faction) }, character: { ...s.character, rank: 'Chuunin', bloodline: 'sand-style', loadout: ['binding-wire', 'scouts-eye', 'stone-guard', 'mist-step'], knownJutsu: ['binding-wire', 'scouts-eye', 'stone-guard', 'mist-step'] } };
+    s = applyCommand(s, { type: 'OFFER_MISSION' }, content);
+    const honor = s.character.honor;
+    s = { ...s, offer: { ...s.offer!, decision: 'protect', plan: 'contain' }, combat: { plan: 'contain', round: 0, advantage: 20, pressure: 0, chakra: 100, exposure: 0, leadHistory: [], supportUsage: {}, steps: [] } };
+    s = applyCommand(s, { type: 'RESOLVE_COMBAT_BEAT', approach: 'protect', jutsuId: 'binding-wire' }, content);
+    s = applyCommand(s, { type: 'RESOLVE_COMBAT_BEAT', approach: 'probe', jutsuId: 'scouts-eye' }, content);
+    s = applyCommand(s, { type: 'RESOLVE_COMBAT_BEAT', approach: 'protect', jutsuId: 'stone-guard' }, content);
+    expect(s.world.storyFlags).toContain('faction:eclipse-covenant:terms:protect');
+    expect(s.character.honor).toBeGreaterThan(honor);
+    expect(s.world.secrets.at(-1)).toContain('portadores raros');
   });
   it('continues a resolved faction contract into an A-rank consequence whose priority changes the world', () => {
     let s = genin(905);
