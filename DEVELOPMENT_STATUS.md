@@ -49,6 +49,7 @@
 
 ## Latest polish pass
 
+- **Kairosoft-style match readout:** operations now scout a deterministic named field opponent with a tactical style, terrain, real objective and displayed OVR. OVR remains scouting only: the quick match is still decided by objective fit, counters present in the equipped kit, field plan, preparation and technique chain. The post-match report presents a compact momentum score and the concrete factors that shaped the opening; it adds no new combat clicks or management screen.
 - **Content-depth pass:** the base library now has 138 techniques, including nine new utility, rescue, deception, movement, sealing and coordinated-field branches. B/A/S mission pools were expanded, and ANBU, Sensei and Commander now have B/A/S operation pools rather than only endgame contracts.
 - **Personal-path pass:** each of the ten Bijū now brings a distinct three-stage authored operation rather than sharing generic seal text. Stone, Storm and Veil Sage expressions use their own authored framing, and the Gates now have a full B → A → S personal arc about power, restraint and survival.
 - **Faction consequence pass:** the first Hunter Directorate, Eclipse Covenant, Red Hands and Ashen Lotus operations now also record a priority-specific political outcome; later chapters retain their stronger faction resolution effects.

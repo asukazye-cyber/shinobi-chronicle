@@ -201,6 +201,20 @@ describe('career simulation', () => {
     expect(s.lastReport?.steps).toHaveLength(4);
     expect(s.lastReport?.steps.slice(1).some(step => step.text.includes('posição'))).toBe(true);
   });
+  it('scouts a seeded field opponent and returns a compact momentum score after the simulated match', () => {
+    const offerFor = () => applyCommand(genin(761), { type: 'OFFER_MISSION' }, content);
+    const first = offerFor(), second = offerFor();
+    expect(first.offer?.opponent).toEqual(second.offer?.opponent);
+    expect(first.offer?.opponent?.name).toBeTruthy();
+    expect(first.offer?.opponent?.overall).toBeGreaterThan(0);
+    let s = applyCommand(first, { type: 'MISSION_DECISION', decision: 'protect' }, content);
+    s = applyCommand(s, { type: 'SET_COMBAT_PLAN', plan: 'guard' }, content);
+    s = applyCommand(s, { type: 'SIMULATE_MISSION' }, content);
+    expect(s.lastReport?.opponent).toEqual(first.offer?.opponent);
+    expect(s.lastReport?.momentum?.player).toBeGreaterThanOrEqual(0);
+    expect(s.lastReport?.momentum?.opponent).toBeLessThanOrEqual(100);
+    expect(s.lastReport?.steps.at(-1)?.text).toContain('Momento');
+  });
   it('uses the equipped kit as a sequence and prevents repeating the same lead immediately', () => {
     let s = genin(57); s = applyCommand(s, { type: 'OFFER_MISSION' }, content); s = applyCommand(s, { type: 'MISSION_DECISION', decision: 'protect' }, content); s = applyCommand(s, { type: 'SET_COMBAT_PLAN', plan: 'contain' }, content); s = applyCommand(s, { type: 'RUN_MISSION' }, content);
     s = applyCommand(s, { type: 'RESOLVE_COMBAT_BEAT', approach: 'probe', jutsuId: 'binding-wire' }, content);
