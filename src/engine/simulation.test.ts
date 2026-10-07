@@ -114,6 +114,14 @@ describe('career simulation', () => {
     expect(profiles).toContain('prodigy');
     expect(profiles).toContain('late-bloomer');
   });
+  it('gives each new life a deterministic but non-fixed home village with local Academy framing', () => {
+    const sameLife = createGame('Aki', 707), repeated = createGame('Aki', 707);
+    const villages = new Set(Array.from({ length: 40 }, (_, seed) => createGame('Aki', seed + 1).character.village));
+    expect(sameLife.character.village).toBe(repeated.character.village);
+    expect(villages.size).toBeGreaterThanOrEqual(4);
+    expect(sameLife.academyIntroduction?.prompt).toContain(sameLife.character.village);
+    expect(sameLife.world.storyFlags.some(flag => flag.startsWith('home:'))).toBe(true);
+  });
   it('lets a difficult start awaken after three successful missions in the chosen field inclination', () => {
     const seed = Array.from({ length: 100 }, (_, value) => value + 1).find(value => createGame('Aki', value).character.potential.profile === 'late-bloomer')!;
     let s = genin(seed); const before = s.character.attributes.intelligence;
