@@ -1,4 +1,4 @@
-import type { AnnualBaseline, AnnualReport, Attribute, CareerPath, Character, CombatApproach, CombatPlan, Command, Competitor, CompetitiveRank, CompetitiveState, Content, FactionId, GameState, Injury, Jutsu, Mentor, MissionOffer, MissionOpponent, MissionRank, MissionReport, Origin, Potential, Rank, Rival, Scar, Tag, TournamentChoice, Trait, VillageActivity } from '../domain/types';
+import type { AnnualBaseline, AnnualReport, Attribute, CareerPath, Character, CombatApproach, CombatPlan, Command, Competitor, CompetitiveRank, CompetitiveState, Content, FactionId, GameState, Injury, Jutsu, Mentor, MissionHighlight, MissionOffer, MissionOpponent, MissionRank, MissionReport, Origin, Potential, Rank, Rival, Scar, Tag, TournamentChoice, Trait, VillageActivity } from '../domain/types';
 import { roll } from './rng';
 import { simulationEvents } from './events';
 
@@ -641,6 +641,18 @@ function simulateMission(state: GameState, content: Content): GameState {
   }
   return note(next, 'combat', 'Combate simulado em uma partida: o relatório mostra as três viradas que a sua build produziu.');
 }
+function missionHighlight(state: GameState, offer: MissionOffer, outcome: MissionReport['outcome']): MissionHighlight {
+  const c = state.character;
+  if (outcome === 'failure' || outcome === 'withdrawn') return { title: 'A carreira sente o golpe', text: state.world.careerCrisis.defeatStreak >= 3 ? 'A maré de derrotas agora faz parte da sua história. Recuperar o rumo muda mais do que um número.' : 'A derrota não apaga sua vida, mas muda a pressão, os rumores e o risco da próxima resposta.', tone: 'setback' };
+  if (outcome === 'partial') return { title: 'Vitória incompleta', text: 'Você trouxe algo de volta do campo, mas deixou uma questão aberta. A carreira avançou com uma cicatriz ou uma dívida concreta.', tone: 'turn' };
+  if (offer.arcId) return { title: 'Um capítulo foi escrito', text: 'Esta operação mudou o mundo, a reputação ou um vínculo. A consequência agora pode reaparecer em futuras ofertas.', tone: 'rise' };
+  if (c.rank === 'Genin' && state.stats.successes === 2) return { title: 'O Circuito Regional está de olho', text: 'Duas vitórias bastaram para abrir sua primeira prova entre vilas. Sua carreira saiu da Academia e entrou no mapa.', tone: 'rise' };
+  if (c.rank === 'Genin' && state.stats.successes >= 3 && c.reputation >= 4) return { title: 'A chave Chuunin se aproxima', text: 'Você já tem nome suficiente para encarar a prova regional. A promoção mede a forma de vencer, não apenas a vitória.', tone: 'rise' };
+  if (c.rank === 'Chuunin' && state.stats.successes >= 8 && c.reputation >= 12) return { title: 'A Cúpula Internacional chamou', text: 'A avaliação Jounin está ao alcance. O jogo agora espera que sua build tenha uma identidade, não só números altos.', tone: 'rise' };
+  if (c.rank === 'Jounin' && c.careerPath && state.stats.successes >= 16) return { title: 'Portas S-rank se abriram', text: 'Seu nome já sustenta missões que deixam marca regional. Poder pessoal importa; a conduta da sua carreira passa a importar mais.', tone: 'rise' };
+  const lead = [...c.loadout].sort((left, right) => (c.mastery[right] ?? 0) - (c.mastery[left] ?? 0) || left.localeCompare(right))[0];
+  return { title: 'A carreira ganhou ritmo', text: lead ? 'A técnica mais presente no seu kit voltou do campo mais confiável. Uma nova missão pode consolidar sua identidade ou revelar outro caminho.' : 'Uma operação concluída sempre deixa uma nova leitura do que sua build ainda precisa.', tone: 'turn' };
+}
 function finishMission(state: GameState, outcome: MissionReport['outcome']): GameState {
   if (!state.offer || !state.combat) throw new Error('Combate sem missão ativa.');
   const o = state.offer, c = state.character, combat = state.combat, prep = new Set(o.preparation), bijuu = c.bijuu, modes = c.modes;
@@ -690,7 +702,9 @@ function finishMission(state: GameState, outcome: MissionReport['outcome']): Gam
     next = { ...next, world: { ...next.world, storyFlags: [...new Set([...next.world.storyFlags, 'potential:late-bloomer:breakthrough'])], secrets: [...next.world.secrets, `A inclinação inicial para ${next.character.origin.latentTag} finalmente se revelou em campo.`] }, character: { ...next.character, potential: { ...next.character.potential, breakthrough: true, specialty: attribute }, attributes: { ...next.character.attributes, [attribute]: next.character.attributes[attribute] + 2 } } };
     next = note(next, 'potential', `Seu potencial tardio despertou após a terceira missão bem-sucedida: ${attribute} +2. O começo não definiu a sua carreira.`);
   }
-  next = note(next, 'mission', `${o.rank}-rank ${o.title}: ${outcome}. ${reward} ryo; confiança da vila ${reputation >= 0 ? '+' : ''}${reputation}.${o.arcId && outcome === 'success' ? ' Arco pessoal avançou.' : ''}`);
+  const highlight = missionHighlight(next, o, outcome);
+  next = { ...next, lastReport: { ...report, highlight } };
+  next = note(next, 'mission', `${o.rank}-rank ${o.title}: ${outcome}. ${reward} ryo; confiança da vila ${reputation >= 0 ? '+' : ''}${reputation}. ${highlight.title}.${o.arcId && outcome === 'success' ? ' Arco pessoal avançou.' : ''}`);
   return next.character.health <= 0 ? conclude(next, 'fallen') : next;
 }
 function resolveCombatBeat(state: GameState, approach: 'probe' | 'commit' | 'protect' | 'feint', jutsuId: string, content: Content): GameState {

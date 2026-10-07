@@ -194,6 +194,8 @@ describe('career simulation', () => {
     let s = genin(55); s = applyCommand(s, { type: 'SET_LOADOUT', jutsuIds: ['stone-guard', 'binding-wire', 'scouts-eye'] }, content); s = applyCommand(s, { type: 'OFFER_MISSION' }, content); s = applyCommand(s, { type: 'MISSION_DECISION', decision: 'protect' }, content); s = applyCommand(s, { type: 'PREPARE', method: 'gear' }, content); s = runMission(s);
     expect(s.lastReport?.steps).toHaveLength(4);
     expect(s.lastReport?.steps[1].text).toContain('função');
+    expect(s.lastReport?.highlight?.title).toBeTruthy();
+    expect(s.lastReport?.highlight?.text).toBeTruthy();
     if (s.lastReport?.outcome === 'success') expect(s.lastReport.reward).toBeGreaterThan(0);
     if (s.lastReport?.outcome === 'failure') expect(s.lastReport.injury?.days).toBeGreaterThan(0);
   });
