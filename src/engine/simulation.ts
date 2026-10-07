@@ -35,13 +35,15 @@ const rivalBlueprints: Omit<Rival, 'name' | 'rank' | 'reputation' | 'rivalry' | 
   { style: 'genjutsu de espelhos e fuga', affinity: 'Miragem', preferredTag: 'stealth' }
 ];
 const defaultJutsu = ['binding-wire', 'scouts-eye', 'stone-guard', 'mist-step', 'warding-palm'];
-type VillageProfile = { id: string; name: string; academyFrame: string; opening: string; rumor: string };
+type ArcStage = 'first' | 'second' | 'final';
+type VillageThread = { activity: VillageActivity; lead: string; stages: Record<ArcStage, [string, string, string, number, string]> };
+type VillageProfile = { id: string; name: string; academyFrame: string; opening: string; rumor: string; thread: VillageThread };
 const homeVillages: VillageProfile[] = [
-  { id: 'hoshigakure', name: 'Hoshigakure', academyFrame: 'torres de sinal atravessam a encosta e todo aluno aprende a ouvir o vento antes do sino', opening: 'Uma luz de sinal falha na torre mais alta.', rumor: 'Mercadores evitam a ponte de Reed Crossing sob as torres de Hoshigakure.' },
-  { id: 'kazan', name: 'Kazan', academyFrame: 'forjas frias, túneis de basalto e pátios de pedra ensinam que terreno também é técnica', opening: 'Uma vibração curta percorre o pátio de basalto.', rumor: 'Caravanas relatam marcas recentes nos túneis de lava fria de Kazan.' },
-  { id: 'mizuhara', name: 'Mizuhara', academyFrame: 'canais, passarelas e neblina fazem cada rota parecer diferente depois da maré', opening: 'A névoa cobre a passarela da Academia antes da chamada.', rumor: 'Barqueiros de Mizuhara evitam um canal onde sensores perderam o rumo.' },
-  { id: 'sunae', name: 'Sunae', academyFrame: 'pátios de lona e paredes baixas enfrentam o vento seco que redesenha as rotas todos os dias', opening: 'Uma rajada apaga as marcas de treino na areia.', rumor: 'Uma caravana de Sunae perdeu sua trilha após uma tempestade de poeira.' },
-  { id: 'kurogane', name: 'Kurogane', academyFrame: 'pontes de metal, guindastes e vielas suspensas tornam altura e peso parte da aula', opening: 'Um cabo de carga vibra acima do pátio da Academia.', rumor: 'Operários de Kurogane ouvem passos em passarelas fechadas depois do toque de recolher.' }
+  { id: 'hoshigakure', name: 'Hoshigakure', academyFrame: 'torres de sinal atravessam a encosta e todo aluno aprende a ouvir o vento antes do sino', opening: 'Uma luz de sinal falha na torre mais alta.', rumor: 'Mercadores evitam a ponte de Reed Crossing sob as torres de Hoshigakure.', thread: { activity: 'listen', lead: 'Uma operadora aposentada mostra que os sinais vistos de um beco não combinam com o registro da torre. Alguém está ensinando a cidade a olhar para o céu errado.', stages: { first: ['A Torre sem Resposta', 'Suba até uma torre de sinal silenciada antes que uma caravana siga instruções falsas pela encosta.', 'Há três lanternas acesas onde deveria haver duas; apagar todas pode deixar civis sem rota.', 180, 'Fio de Hoshigakure: sinais e confiança'], second: ['Luzes que Chamam', 'Descubra quem replica o código de emergência para empurrar pessoas e suprimentos até corredores de emboscada.', 'O código foi copiado por alguém que conhecia a Academia; expor o método também expõe quem ainda depende dele.', 520, 'Conseqüência de Hoshigakure: rede de sinais'], final: ['Céu de Sinais', 'Impeça que uma rede de torres transforme uma crise regional em pânico calculado entre vilas.', 'Derrubar a rede encerra o risco agora; reescrever o código obriga todos a confiar em uma nova autoria.', 980, 'Final de Hoshigakure: quem conduz o aviso'] } } },
+  { id: 'kazan', name: 'Kazan', academyFrame: 'forjas frias, túneis de basalto e pátios de pedra ensinam que terreno também é técnica', opening: 'Uma vibração curta percorre o pátio de basalto.', rumor: 'Caravanas relatam marcas recentes nos túneis de lava fria de Kazan.', thread: { activity: 'practice', lead: 'O eco do treino revela uma vibração abaixo do pátio de basalto. Um operário pede discrição: a galeria deveria estar lacrada desde a última erupção.', stages: { first: ['Vibração no Basalto', 'Entre numa galeria sob Kazan e retire trabalhadores antes que um selo antigo transforme tremores em desabamento.', 'Fechar a fenda protege a forja; seguir o pulso pode revelar quem reativou o selo.', 185, 'Fio de Kazan: forja e subterrâneo'], second: ['A Fenda sobre a Forja', 'Decida o destino de uma câmara de minério que mantém a vila funcionando, mas também abriga a marca deixada pelo sabotador.', 'A forja pede continuidade, os mineiros pedem segurança e a prova aponta para um contrato antigo.', 530, 'Conseqüência de Kazan: trabalho e risco'], final: ['A Montanha Escolhe', 'Sustente Kazan durante uma ruptura que pode soterrar a prova ou expor uma rede que usava a montanha como arma.', 'Uma explosão controlada salva a cidade agora; uma contenção longa pode salvar pessoas que ninguém vê.', 990, 'Final de Kazan: o que permanece de pé'] } } },
+  { id: 'mizuhara', name: 'Mizuhara', academyFrame: 'canais, passarelas e neblina fazem cada rota parecer diferente depois da maré', opening: 'A névoa cobre a passarela da Academia antes da chamada.', rumor: 'Barqueiros de Mizuhara evitam um canal onde sensores perderam o rumo.', thread: { activity: 'patrol', lead: 'Durante a ronda, uma barqueira entrega um sino de casco preso numa rede. Ele toca quando ninguém se move — e só aponta para um canal apagado nos mapas.', stages: { first: ['Canal sem Margem', 'Escolte uma embarcação presa num canal que desaparece sob a neblina antes que a maré feche a saída.', 'A rota mais curta atravessa águas proibidas; a rota segura deixa outra embarcação à deriva.', 190, 'Fio de Mizuhara: maré e passagem'], second: ['A Maré que Leva Nomes', 'Proteja um registro de barcos desaparecidos sem transformar sobreviventes em suspeitos convenientes.', 'O arquivo prova uma rota clandestina, mas também protege quem fugiu por ela quando a vila não ajudou.', 540, 'Conseqüência de Mizuhara: memória e travessia'], final: ['Sete Pontes sob Névoa', 'Evite que bloqueios coordenados cortem Mizuhara em distritos que não conseguem mais se socorrer.', 'Abrir todas as pontes expõe a vila; escolher algumas decide quem ficará esperando a maré baixar.', 1000, 'Final de Mizuhara: quem atravessa'] } } },
+  { id: 'sunae', name: 'Sunae', academyFrame: 'pátios de lona e paredes baixas enfrentam o vento seco que redesenha as rotas todos os dias', opening: 'Uma rajada apaga as marcas de treino na areia.', rumor: 'Uma caravana de Sunae perdeu sua trilha após uma tempestade de poeira.', thread: { activity: 'listen', lead: 'Uma comerciante repete a mesma direção duas vezes, como se tivesse decorado uma rota que a areia já apagou. O mapa que ela carrega não pertence a nenhuma caravana registrada.', stages: { first: ['Mapa na Areia', 'Encontre uma caravana antes que marcadores falsos a levem para fora das dunas seguras.', 'O guia insiste em seguir o mapa; quem o desenhou talvez ainda esteja observando cada decisão.', 185, 'Fio de Sunae: rota e miragem'], second: ['Vento de Retorno', 'Descubra por que poços de passagem foram adulterados sem interromper a única rota de água de famílias nômades.', 'Expor os sabotadores seca o acordo atual; negociar preserva a água, mas deixa a ameaça viva.', 525, 'Conseqüência de Sunae: água e verdade'], final: ['O Deserto se Lembra', 'Interrompa uma crise de areia marcada que ameaça apagar vilas inteiras dos mapas políticos.', 'A tempestade não distingue culpados; o lado que controla os marcos quer que você escolha quem terá caminho de volta.', 985, 'Final de Sunae: território e retorno'] } } },
+  { id: 'kurogane', name: 'Kurogane', academyFrame: 'pontes de metal, guindastes e vielas suspensas tornam altura e peso parte da aula', opening: 'Um cabo de carga vibra acima do pátio da Academia.', rumor: 'Operários de Kurogane ouvem passos em passarelas fechadas depois do toque de recolher.', thread: { activity: 'mentor', lead: 'Seu mentor reconhece a marca numa peça de metal trazida por um aluno: ela é de uma ponte desmontada depois de um acidente que ninguém mais comenta.', stages: { first: ['Cabo Rompido', 'Investigue uma passarela de carga que está falhando antes que o turno inteiro fique preso acima do vale.', 'A sabotagem parece recente, mas a ponte foi condenada por um relatório antigo que talvez estivesse certo.', 190, 'Fio de Kurogane: peso e responsabilidade'], second: ['Ponte de Peso', 'Proteja os trabalhadores que recusam atravessar uma estrutura essencial enquanto o conselho exige que a produção continue.', 'Parar a ponte afeta toda a vila; mantê-la aberta transforma medo justificado em dever obrigatório.', 535, 'Conseqüência de Kurogane: trabalho e decisão'], final: ['Cidade Suspensa', 'Impeça que uma rede de guindastes seja usada para isolar distritos inteiros de Kurogane durante uma crise política.', 'Cortar os cabos salva um lado e derruba o outro; coordenar a retirada exige confiar em gente que discorda de você.', 995, 'Final de Kurogane: o que sustenta a cidade'] } } }
 ];
 function defaultFactions() {
   return [
@@ -86,6 +88,12 @@ function resolveTournamentRound(state: GameState, choice: TournamentChoice, cont
 }
 function originProfile(rngState: number): [Origin, Mentor, number] { let originIndex: number, mentorIndex: number, rng: number; [originIndex, rng] = roll(rngState, origins.length); [mentorIndex, rng] = roll(rng, mentors.length); const [name, nextRng] = shinobiName(rng); return [origins[originIndex], { ...mentors[mentorIndex], name, bond: 12, lessons: 0 }, nextRng]; }
 function homeVillage(rngState: number): [VillageProfile, number] { let index: number, rng: number; [index, rng] = roll(rngState, homeVillages.length); return [homeVillages[index], rng]; }
+function homeVillageFor(state: GameState): VillageProfile { return homeVillages.find(village => state.world.storyFlags.includes(`home:${village.id}`) || village.name === state.character.village) ?? homeVillages[0]; }
+function openHomeThread(state: GameState, activity: VillageActivity): { state: GameState; text: string } {
+  const home = homeVillageFor(state), leadFlag = `home:${home.id}:lead`;
+  if (home.thread.activity !== activity || state.world.storyFlags.includes(leadFlag)) return { state, text: '' };
+  return { state: { ...state, world: { ...state.world, storyFlags: [...new Set([...state.world.storyFlags, leadFlag])], secrets: [...state.world.secrets, `Um fio local de ${home.name} começou: ${home.thread.lead}`], rumors: [...state.world.rumors.slice(-3), `Em ${home.name}, uma ação comum deixou uma pergunta que não cabe mais na rotina.`] } }, text: ` ${home.thread.lead} Isso não se resolve agora: o fio pode voltar como uma operação de ${home.name}.` };
+}
 function rivalProfile(rngState: number): [Rival, number] { let index: number, rng: number; [index, rng] = roll(rngState, rivalBlueprints.length); const blueprint = rivalBlueprints[index]; const [name, nextRng] = shinobiName(rng); return [{ ...blueprint, name, rank: 'Academy', reputation: 1, rivalry: 12, stage: 0, stance: 'competitive', lastEncounterDay: -99, studiedStages: [], memory: 'transforma cada encontro em uma medida do próprio valor' }, nextRng]; }
 const note = (s: GameState, type: string, text: string): GameState => { const event = { day: s.character.day, type, text }; simulationEvents.publish(event); return { ...s, chronicle: [...s.chronicle, event] }; };
 const days = (s: GameState, count: number): GameState => {
@@ -99,6 +107,8 @@ function spendVillageDay(state: GameState, activity: VillageActivity, content: C
   if (state.offer || state.combat || state.tournament || state.regionalCircuit) throw new Error('Resolva o compromisso atual antes de gastar um dia livre na vila.');
   if (activity === 'listen' && (state.world.localIntel ?? 0) >= 2) throw new Error('Você já reuniu toda a inteligência local que vale levar para a próxima missão.');
   let next = days(state, activity === 'patrol' ? 2 : 1);
+  const homeThread = openHomeThread(next, activity); next = homeThread.state;
+  const villageNote = (text: string) => note(next, 'village', `${text}${homeThread.text}`);
   const c = next.character;
   if (activity === 'practice') {
     const jutsu = [...c.loadout].map(id => technique(content, id)).sort((a, b) => (c.mastery[a.id] ?? 0) - (c.mastery[b.id] ?? 0) || a.id.localeCompare(b.id))[0];
@@ -107,22 +117,22 @@ function spendVillageDay(state: GameState, activity: VillageActivity, content: C
     // turns a routine into mastery. This is a soft, diegetic plateau rather than
     // an action quota: every completed operation raises the point worth drilling.
     const fieldProof = Math.max(2, state.stats.missions + 2);
-    if ((c.mastery[jutsu.id] ?? 0) >= fieldProof) return note(next, 'village', `${jutsu.name} já responde ao exercício conhecido. O próximo salto de domínio pede uma missão nova; o dia serviu para manter o kit afiado.`);
+    if ((c.mastery[jutsu.id] ?? 0) >= fieldProof) return villageNote(`${jutsu.name} já responde ao exercício conhecido. O próximo salto de domínio pede uma missão nova; o dia serviu para manter o kit afiado.`);
     c.mastery = { ...c.mastery, [jutsu.id]: (c.mastery[jutsu.id] ?? 0) + 1 };
     let incident: number, rng: number; [incident, rng] = roll(next.rngState, 5); next.rngState = rng;
     if (incident === 0 && c.mastery[jutsu.id] < fieldProof) {
       c.mastery[jutsu.id]++;
-      return note(next, 'village', `${c.name} foi ao campo de treinamento praticar ${jutsu.name}. Depois de repetir a sequência até o pulso arder, encontra um encaixe novo: domínio +2 (${c.mastery[jutsu.id]}/${fieldProof}).`);
+      return villageNote(`${c.name} foi ao campo de treinamento praticar ${jutsu.name}. Depois de repetir a sequência até o pulso arder, encontra um encaixe novo: domínio +2 (${c.mastery[jutsu.id]}/${fieldProof}).`);
     }
     if (incident === 1) {
       c.health = Math.max(1, c.health - 2);
-      return note(next, 'village', `${c.name} foi ao campo de treinamento praticar ${jutsu.name}. Uma queda mal calculada deixa uma dor passageira no ombro: domínio +1 (${c.mastery[jutsu.id]}/${fieldProof}), saúde -2.`);
+      return villageNote(`${c.name} foi ao campo de treinamento praticar ${jutsu.name}. Uma queda mal calculada deixa uma dor passageira no ombro: domínio +1 (${c.mastery[jutsu.id]}/${fieldProof}), saúde -2.`);
     }
     if (incident === 2) {
       c.inventory.antidote++;
-      return note(next, 'village', `${c.name} foi ao campo de treinamento praticar ${jutsu.name}. Ao ajudar a recolher o material de uma turma menor, recebe um antídoto de campanha: domínio +1 (${c.mastery[jutsu.id]}/${fieldProof}), antídoto +1.`);
+      return villageNote(`${c.name} foi ao campo de treinamento praticar ${jutsu.name}. Ao ajudar a recolher o material de uma turma menor, recebe um antídoto de campanha: domínio +1 (${c.mastery[jutsu.id]}/${fieldProof}), antídoto +1.`);
     }
-    return note(next, 'village', `${c.name} foi ao pátio de ${c.village} praticar ${jutsu.name}. A repetição não foi bonita, mas ficou mais confiável: domínio +1 (${c.mastery[jutsu.id]}/${fieldProof}).`);
+    return villageNote(`${c.name} foi ao pátio de ${c.village} praticar ${jutsu.name}. A repetição não foi bonita, mas ficou mais confiável: domínio +1 (${c.mastery[jutsu.id]}/${fieldProof}).`);
   }
   if (activity === 'listen') {
     let factionIndex: number, rng: number; [factionIndex, rng] = roll(next.rngState, next.world.factions.length);
@@ -130,13 +140,13 @@ function spendVillageDay(state: GameState, activity: VillageActivity, content: C
     next = { ...next, rngState: rng, world: { ...next.world, localIntel: Math.min(2, (next.world.localIntel ?? 0) + 1), rumors: [...next.world.rumors.slice(-3), `Nos becos de ${c.village}, alguém menciona ${faction.name} e uma rota que não aparece nos relatórios.`] } };
     let incident: number, nextRng: number; [incident, nextRng] = roll(next.rngState, 4); next.rngState = nextRng;
     if (incident === 0) {
-      if (faction.id === 'eclipse-covenant') { c.inventory['sealing-slate']++; return note(next, 'village', `${c.name} seguiu um boato sobre o ${faction.name} pelos becos de ${c.village}. A rota era real — e no fundo de uma caixa abandonada havia uma placa de selamento. Pista +1, placa +1.`); }
-      if (faction.id === 'red-hands') { c.ryo += 6; c.notoriety++; return note(next, 'village', `${c.name} seguiu um boato sobre as Mãos Rubras. Um carregador paga 6 ryo por silêncio, mas o nome de ${c.name} circula um pouco mais: pista +1, notoriedade +1.`); }
-      if (faction.id === 'hunter-directorate') { next.world.councilTrust++; return note(next, 'village', `${c.name} seguiu um boato sobre a Diretoria de Caçadores e entregou a pista sem se expor. O conselho registra a iniciativa: pista +1, confiança do conselho +1.`); }
+      if (faction.id === 'eclipse-covenant') { c.inventory['sealing-slate']++; return villageNote(`${c.name} seguiu um boato sobre o ${faction.name} pelos becos de ${c.village}. A rota era real — e no fundo de uma caixa abandonada havia uma placa de selamento. Pista +1, placa +1.`); }
+      if (faction.id === 'red-hands') { c.ryo += 6; c.notoriety++; return villageNote(`${c.name} seguiu um boato sobre as Mãos Rubras. Um carregador paga 6 ryo por silêncio, mas o nome de ${c.name} circula um pouco mais: pista +1, notoriedade +1.`); }
+      if (faction.id === 'hunter-directorate') { next.world.councilTrust++; return villageNote(`${c.name} seguiu um boato sobre a Diretoria de Caçadores e entregou a pista sem se expor. O conselho registra a iniciativa: pista +1, confiança do conselho +1.`); }
       c.honor++;
-      return note(next, 'village', `${c.name} seguiu um boato sobre o Lótus Cinzento e evita que uma família entre numa rota perigosa. Pista +1, honra +1.`);
+      return villageNote(`${c.name} seguiu um boato sobre o Lótus Cinzento e evita que uma família entre numa rota perigosa. Pista +1, honra +1.`);
     }
-    return note(next, 'village', `${c.name} passou o dia ouvindo ${c.village} sem comprar uma promessa. Uma rota ligada a ${faction.name} entra no caderno: inteligência local ${next.world.localIntel}/2 para a próxima missão.`);
+    return villageNote(`${c.name} passou o dia ouvindo ${c.village} sem comprar uma promessa. Uma rota ligada a ${faction.name} entra no caderno: inteligência local ${next.world.localIntel}/2 para a próxima missão.`);
   }
   if (activity === 'mentor') {
     c.mentor.bond = Math.min(50, c.mentor.bond + 1);
@@ -144,9 +154,9 @@ function spendVillageDay(state: GameState, activity: VillageActivity, content: C
     let incident: number, rng: number; [incident, rng] = roll(next.rngState, 4); next.rngState = rng;
     if (incident === 0) {
       const jutsu = [...c.loadout].map(id => technique(content, id)).sort((a, b) => (c.mastery[a.id] ?? 0) - (c.mastery[b.id] ?? 0) || a.id.localeCompare(b.id))[0];
-      if (jutsu) { c.mastery = { ...c.mastery, [jutsu.id]: (c.mastery[jutsu.id] ?? 0) + 1 }; return note(next, 'village', `${c.name} visita ${c.mentor.name}. Uma correção simples de ${c.mentor.doctrine} muda o ritmo de ${jutsu.name}: vínculo +1, domínio de ${jutsu.name} +1.`); }
+      if (jutsu) { c.mastery = { ...c.mastery, [jutsu.id]: (c.mastery[jutsu.id] ?? 0) + 1 }; return villageNote(`${c.name} visita ${c.mentor.name}. Uma correção simples de ${c.mentor.doctrine} muda o ritmo de ${jutsu.name}: vínculo +1, domínio de ${jutsu.name} +1.`); }
     }
-    return note(next, 'village', `${c.name} visita ${c.mentor.name}. A conversa sobre a doutrina ${c.mentor.doctrine} não dá uma técnica pronta, mas muda a maneira de olhar o próximo campo: vínculo +1 (${c.mentor.bond}).`);
+    return villageNote(`${c.name} visita ${c.mentor.name}. A conversa sobre a doutrina ${c.mentor.doctrine} não dá uma técnica pronta, mas muda a maneira de olhar o próximo campo: vínculo +1 (${c.mentor.bond}).`);
   }
   const activeTension = next.world.borderTension > 0;
   c.ryo += activeTension ? 12 : 3;
@@ -155,10 +165,10 @@ function spendVillageDay(state: GameState, activity: VillageActivity, content: C
   next.world.rumors = [...next.world.rumors.slice(-3), `A ronda de ${c.name} manteve um distrito de ${c.village} calmo por mais uma noite.`];
   if (activeTension) {
     let incident: number, rng: number; [incident, rng] = roll(next.rngState, 4); next.rngState = rng;
-    if (incident === 0) { c.inventory.antidote++; return note(next, 'village', `${c.name} patrulha um distrito em alerta e encontra um mensageiro ferido antes da emboscada. A ronda fecha a tensão: 12 ryo, honra/confiança da vila +1, antídoto +1, tensão -1.`); }
-    if (incident === 1) { c.health = Math.max(1, c.health - 2); return note(next, 'village', `${c.name} patrulha um distrito em alerta. Um arremesso pega de raspão, mas a rota fica segura: 12 ryo, honra/confiança da vila +1, saúde -2, tensão -1.`); }
+    if (incident === 0) { c.inventory.antidote++; return villageNote(`${c.name} patrulha um distrito em alerta e encontra um mensageiro ferido antes da emboscada. A ronda fecha a tensão: 12 ryo, honra/confiança da vila +1, antídoto +1, tensão -1.`); }
+    if (incident === 1) { c.health = Math.max(1, c.health - 2); return villageNote(`${c.name} patrulha um distrito em alerta. Um arremesso pega de raspão, mas a rota fica segura: 12 ryo, honra/confiança da vila +1, saúde -2, tensão -1.`); }
   }
-  return note(next, 'village', activeTension
+  return villageNote(activeTension
     ? `${c.name} assume uma ronda local e impede que a tensão vire incidente: 12 ryo, honra/confiança da vila +1, tensão de fronteira -1. Dois dias passam.`
     : `${c.name} cobre uma ronda curta. A fronteira está calma: 3 ryo e uma noite tranquila, sem transformar paz em farm de honra. Dois dias passam.`);
 }
@@ -535,6 +545,13 @@ function factionChoiceEffect(arcId: string, decision: NonNullable<MissionOffer['
       : { council: 1, honor: 1, notoriety: 0, underworld: 1, heat: 2, text: 'Você força corredores de evacuação entre inimigos que preferiam não se reconhecer.' };
   return { council: 0, honor: 0, notoriety: 0, underworld: 0, heat: 0, text: 'Sua decisão deixa uma memória específica na facção envolvida.' };
 }
+function homeChoiceEffect(arcId: string, decision: NonNullable<MissionOffer['decision']>) {
+  const [, homeId, stage] = arcId.split(':'), home = homeVillages.find(village => village.id === homeId)?.name ?? 'sua vila';
+  const final = stage === 'final';
+  if (decision === 'protect') return { council: final ? 2 : 1, honor: final ? 3 : 2, notoriety: 0, underworld: 0, tension: -1, text: `Em ${home}, você escolhe sustentar quem ficaria exposto. A vila passa a lembrar que sua resposta tinha uma linha.` };
+  if (decision === 'pursue') return { council: 1, honor: 0, notoriety: final ? 2 : 1, underworld: 0, tension: -2, text: `Em ${home}, você prioriza interromper a fonte da crise. O problema recua, mas seu método deixa uma assinatura difícil de ignorar.` };
+  return { council: 1, honor: 1, notoriety: 0, underworld: final ? 2 : 1, tension: 0, text: `Em ${home}, você constrói uma saída que não entrega a crise a uma única força. A solução custa confiança, mas cria uma rota que antes não existia.` };
+}
 function missionFaction(state: GameState, rank: MissionRank): FactionId | undefined {
   if (rankIndex[rank] < rankIndex.B) return undefined;
   if (state.world.missingNin) return 'hunter-directorate';
@@ -566,6 +583,15 @@ function crossDisciplineRule(disciplines: string[], offer: MissionOffer, prepara
   if (has('tracker') && has('ironhand') && offer.decision === 'pursue') return { advantage: 2, pressure: 0, exposure: 0, text: 'Rastro + impacto não deixa ao alvo uma rota confortável para fugir.' };
   if (has('tactician') && has('vanguard') && preparation.has('team')) return { advantage: 2, pressure: 0, exposure: 1, text: 'A equipe abre uma janela calculada; o avanço ganha força, mas alguém precisa se expor.' };
   return { advantage: 0, pressure: 0, exposure: 0, text: '' };
+}
+/** A village thread is earned by living there, then returns through ordinary mission flow. */
+function homeArc(state: GameState, rank: MissionRank): ArcOffer | undefined {
+  const home = homeVillageFor(state), flags = state.world.storyFlags, base = `home:${home.id}`;
+  if (!flags.includes(`${base}:lead`)) return undefined;
+  if (!flags.includes(`${base}:first`)) return { id: `${base}:first`, entry: home.thread.stages.first };
+  if (rankIndex[rank] >= rankIndex.C && !flags.includes(`${base}:second`)) return { id: `${base}:second`, entry: home.thread.stages.second };
+  if (rankIndex[rank] >= rankIndex.A && !flags.includes(`${base}:final`)) return { id: `${base}:final`, entry: home.thread.stages.final };
+  return undefined;
 }
 /** Major events are still ordinary offers: same preparation, plan and fast simulation. */
 function worldArc(state: GameState, rank: MissionRank): ArcOffer | undefined {
@@ -619,7 +645,7 @@ function opponentFieldRule(opponent: MissionOpponent | undefined, tags: Set<Tag>
   return { advantage: Number(answersStyle) + Number(objectiveFit), pressure: Number(!answersStyle) + Number(!objectiveFit), text: `${answerText} ${objectiveText} ${terrainText}`, factors: [answerText, objectiveText, terrainText] };
 }
 function offerMission(state: GameState): GameState {
-  const rank = missionRank(state.character, state.stats), path = state.character.careerPath, personal = personalArc(state, rank), arc = worldArc(state, rank) ?? personal ?? factionArc(state, rank) ?? careerArc(state, rank); const pool = path && careerOperations[path]?.[rank] ? careerOperations[path][rank]! : offers[rank]; let rng = state.rngState, pick: number, variance: number; [pick, rng] = roll(rng, pool.length); [variance, rng] = roll(rng, 4);
+  const rank = missionRank(state.character, state.stats), path = state.character.careerPath, personal = personalArc(state, rank), arc = homeArc(state, rank) ?? worldArc(state, rank) ?? personal ?? factionArc(state, rank) ?? careerArc(state, rank); const pool = path && careerOperations[path]?.[rank] ? careerOperations[path][rank]! : offers[rank]; let rng = state.rngState, pick: number, variance: number; [pick, rng] = roll(rng, pool.length); [variance, rng] = roll(rng, 4);
   const [title, objective, rawIntel, reward, statedRisk] = arc?.entry ?? pool[pick]; const factionId = arc?.id.startsWith('faction:') ? arc.id.split(':')[1] as FactionId : missionFaction(state, rank); const faction = state.world.factions.find(item => item.id === factionId); const intel = faction ? `${rawIntel} Sinais ligam a crise ao ${faction.name}, que ${faction.agenda}.` : rawIntel; const base = { E: 3, D: 5, C: 8, B: 11, A: 14, S: 18 }[rank];
   const dilemma = rank === 'D' ? 'O courier pode estar ferido; seguir os rastros pode expor civis.' : rank === 'C' ? 'O objetivo e uma testemunha vulnerável se separam no ponto de contato.' : rank === 'S' ? 'Nenhuma escolha preserva tudo: pessoas, segredo e estabilidade política entram em colisão.' : 'A conclusão eficiente pode ferir uma relação política que a vila ainda precisa.';
   const hiddenThreat = base + variance + Number(Boolean(arc)); const opponent: MissionOpponent | undefined = rank === 'E' ? undefined : (() => { const result = missionOpponent(rng, rank, hiddenThreat); rng = result[1]; return result[0]; })();
@@ -735,6 +761,10 @@ function finishMission(state: GameState, outcome: MissionReport['outcome']): Gam
       const choice = factionChoiceEffect(o.arcId, o.decision!);
       next = { ...next, world: { ...next.world, councilTrust: next.world.councilTrust + Number(isHunterReckoning) + choice.council, storyFlags: [...new Set([...next.world.storyFlags, `${o.arcId}:${o.decision}`])], factions: next.world.factions.map(faction => faction.id === factionId ? { ...faction, standing: faction.standing + 3, heat: Math.max(0, faction.heat - (isHunterReckoning ? 4 : 2) + choice.heat) } : faction), secrets: [...next.world.secrets, `A resposta ao ${next.world.factions.find(faction => faction.id === factionId)?.name} mudou o equilíbrio de influência na região. ${choice.text}`] }, character: { ...next.character, honor: next.character.honor + choice.honor, notoriety: Math.max(0, next.character.notoriety + choice.notoriety), factionTrust: { ...next.character.factionTrust, village: next.character.factionTrust.village + Number(isHunterReckoning), underworld: Math.max(0, next.character.factionTrust.underworld + Number(factionId === 'red-hands') + choice.underworld) } } };
     }
+    if (o.arcId.startsWith('home:')) {
+      const choice = homeChoiceEffect(o.arcId, o.decision!);
+      next = { ...next, world: { ...next.world, councilTrust: next.world.councilTrust + choice.council, borderTension: Math.max(0, next.world.borderTension + choice.tension), storyFlags: [...new Set([...next.world.storyFlags, `${o.arcId}:${o.decision}`])], secrets: [...next.world.secrets, `Conseqüência local: ${choice.text}`], rumors: [...next.world.rumors.slice(-3), choice.text] }, character: { ...next.character, honor: next.character.honor + choice.honor, notoriety: Math.max(0, next.character.notoriety + choice.notoriety), factionTrust: { ...next.character.factionTrust, village: next.character.factionTrust.village + 1, underworld: Math.max(0, next.character.factionTrust.underworld + choice.underworld) } } };
+    }
   }
   if (outcome === 'success' && next.character.potential.profile === 'late-bloomer' && !next.character.potential.breakthrough && next.stats.successes >= 3) {
     const breakthroughAttribute: Record<Tag, Attribute> = { offense: 'taijutsu', defense: 'stamina', control: 'handSeals', mobility: 'speed', perception: 'intelligence', support: 'chakraControl', stealth: 'genjutsu' };
@@ -766,7 +796,7 @@ function conclude(state: GameState, ending: 'retired' | 'fallen'): GameState {
   const geninText = c.geninFieldMark === 'guardian' ? 'salvar pessoas no Circuito Regional' : c.geninFieldMark === 'scout' ? 'ler uma rota impossível no Circuito Regional' : c.geninFieldMark === 'mediator' ? 'evitar que rivais transformassem uma prova em conflito' : 'os primeiros passos como Genin';
   const scars = c.scars.length ? `carregou ${c.scars.map(scar => scar.name.toLowerCase()).join(', ')}` : 'saiu sem cicatrizes duradouras'; const exile = state.world.missingNin ? `foi caçado como missing-nin por ${state.world.missingNin.reason}` : 'manteve uma relação pública com a vila';
   const biography = `${c.name} serviu ${state.stats.daysServed} dias, completou ${state.stats.successes}/${state.stats.missions} missões e alcançou ${c.rank}. Veio de ${c.origin.academyMemory}, foi orientado por ${c.mentor.name} e começou por ${geninText}; depois foi marcado por ${pathText}, ${c.relationships.filter(r => r.bond >= 25).map(r => r.name).join(', ') || 'laços ainda em formação'}, ${state.rival.name} como rival ${state.rival.stance}, ${state.world.storyFlags.length} marcos de arco, ${scars}, ${exile}, ${c.honor} honra e ${c.notoriety} notoriedade.`;
-  const factionFinales = ['faction:eclipse-covenant:archive', 'faction:red-hands:bridge', 'faction:ashen-lotus:ashes']; const honors = [state.stats.successes >= 8 ? 'Confiável em Campo' : '', state.stats.highestMission === 'S' ? 'Crise S-rank Enfrentada' : '', state.world.careerCrisis.defeatStreak >= 3 && state.stats.successes > state.stats.failures ? 'Retorno Após a Maré' : '', state.world.storyFlags.some(flag => flag.endsWith(':final') || flag === 'bijuu:final' || flag === 'sage:final' || flag === 'rival:final') ? 'Legado de Arco Concluído' : '', factionFinales.every(flag => state.world.storyFlags.includes(flag)) ? 'Voz das Fronteiras' : '', c.relationships.some(r => r.bond >= 35) ? 'Laço que Permanece' : '', c.specialization ? 'Caminho Próprio' : '', c.summon && c.summon.bond >= 5 ? 'Contrato Respeitado' : ''].filter(Boolean);
+  const factionFinales = ['faction:eclipse-covenant:archive', 'faction:red-hands:bridge', 'faction:ashen-lotus:ashes']; const honors = [state.stats.successes >= 8 ? 'Confiável em Campo' : '', state.stats.highestMission === 'S' ? 'Crise S-rank Enfrentada' : '', state.world.careerCrisis.defeatStreak >= 3 && state.stats.successes > state.stats.failures ? 'Retorno Após a Maré' : '', state.world.storyFlags.some(flag => flag.endsWith(':final') || flag === 'bijuu:final' || flag === 'sage:final' || flag === 'rival:final') ? 'Legado de Arco Concluído' : '', state.world.storyFlags.some(flag => /^home:[^:]+:final$/.test(flag)) ? `Raiz de ${c.village}` : '', factionFinales.every(flag => state.world.storyFlags.includes(flag)) ? 'Voz das Fronteiras' : '', c.relationships.some(r => r.bond >= 35) ? 'Laço que Permanece' : '', c.specialization ? 'Caminho Próprio' : '', c.summon && c.summon.bond >= 5 ? 'Contrato Respeitado' : ''].filter(Boolean);
   const next = { ...state, character: { ...c, rank: ending === 'fallen' ? 'Fallen' as Rank : 'Retired' as Rank }, legacy: { ending, title, biography, honors, stats: state.stats } };
   return note(next, 'legacy', `${c.name}: ${title}. A crônica é preservada para a Hall of Legends.`);
 }

@@ -166,6 +166,21 @@ describe('career simulation', () => {
     expect(s.character.ryo).toBe(ryo + 3);
     expect(s.character.honor).toBe(honor);
   });
+  it('turns one optional home-village action into a three-stage career thread instead of a disposable message', () => {
+    let s = genin(933);
+    s = { ...s, character: { ...s.character, village: 'Hoshigakure' }, world: { ...s.world, localIntel: 0, storyFlags: ['home:hoshigakure'] } };
+    s = applyCommand(s, { type: 'SPEND_VILLAGE_DAY', activity: 'listen' }, content);
+    expect(s.world.storyFlags).toContain('home:hoshigakure:lead');
+    expect(s.chronicle.at(-1)?.text).toContain('fio pode voltar');
+    s = applyCommand(s, { type: 'OFFER_MISSION' }, content);
+    expect(s.offer?.arcId).toBe('home:hoshigakure:first');
+    s = { ...s, offer: undefined, stats: { ...s.stats, successes: 5 }, character: { ...s.character, rank: 'Chuunin', loadout: ['binding-wire', 'scouts-eye', 'stone-guard', 'mist-step'], knownJutsu: ['binding-wire', 'scouts-eye', 'stone-guard', 'mist-step'] }, world: { ...s.world, storyFlags: [...s.world.storyFlags, 'home:hoshigakure:first'] } };
+    s = applyCommand(s, { type: 'OFFER_MISSION' }, content);
+    expect(s.offer?.arcId).toBe('home:hoshigakure:second');
+    s = { ...s, offer: undefined, stats: { ...s.stats, successes: 14 }, character: { ...s.character, rank: 'Jounin', loadout: ['binding-wire', 'scouts-eye', 'stone-guard', 'mist-step', 'warding-palm'], knownJutsu: ['binding-wire', 'scouts-eye', 'stone-guard', 'mist-step', 'warding-palm'] }, world: { ...s.world, storyFlags: [...s.world.storyFlags, 'home:hoshigakure:second'] } };
+    s = applyCommand(s, { type: 'OFFER_MISSION' }, content);
+    expect(s.offer?.arcId).toBe('home:hoshigakure:final');
+  });
   it('turns a chosen action into a deterministic narrated moment with a concrete effect', () => {
     const play = () => {
       let s = genin(321);
