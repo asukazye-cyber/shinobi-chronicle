@@ -12,6 +12,7 @@ const genin = (seed = 88) => {
   s = applyCommand(s, { type: 'SET_TRAINING_FOCUS', attribute: 'intelligence' }, content);
   s = applyCommand(s, { type: 'SET_TRAINING_FOCUS', attribute: 'handSeals' }, content);
   s = applyCommand(s, { type: 'RESOLVE_ACADEMY_INTRO', choice: 'trace' }, content);
+  s = applyCommand(s, { type: 'RESOLVE_ACADEMY_INTRO', choice: 'observe' }, content);
   while (s.character.attributes.intelligence + s.character.attributes.handSeals < 8) {
     const attribute = s.character.attributes.intelligence <= s.character.attributes.handSeals ? 'intelligence' : 'handSeals';
     s = applyCommand(s, { type: 'TRAIN', attribute }, content);
@@ -89,13 +90,17 @@ describe('career simulation', () => {
     s = { ...s, character: { ...s.character, development: { ...s.character.development, sessions: s.character.development.limit } } };
     expect(() => applyCommand(s, { type: 'TRAIN', attribute: 'ninjutsu' }, content)).toThrow('sessões decisivas');
   });
-  it('opens each life with a resolved Academy scene that leaves a contextual field inclination', () => {
+  it('opens each life with two brief Academy scenes that leave a contextual field inclination and a relationship memory', () => {
     let s = createGame('Aki', 515);
     expect(s.academyIntroduction?.prompt).toContain('primeiro exercício');
     s = applyCommand(s, { type: 'RESOLVE_ACADEMY_INTRO', choice: 'shield' }, content);
-    expect(s.academyIntroduction).toBeUndefined();
+    expect(s.academyIntroduction?.stage).toBe(1);
+    expect(s.academyIntroduction?.prompt).toContain('teste');
     expect(s.character.origin.latentTag).toBe('support');
-    expect(s.character.honor).toBe(1);
+    s = applyCommand(s, { type: 'RESOLVE_ACADEMY_INTRO', choice: 'connect' }, content);
+    expect(s.academyIntroduction).toBeUndefined();
+    expect(s.character.honor).toBe(2);
+    expect(s.character.mentor.bond).toBeGreaterThan(12);
     expect(s.chronicle.at(-1)?.type).toBe('introduction');
   });
   it('creates varied but bounded starting profiles, including a deterministic trade-off trait', () => {

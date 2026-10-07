@@ -46,8 +46,9 @@ export type CompetitiveState = { rosters: Record<CompetitiveRank, Competitor[]>;
 export type GeninFieldMark = 'guardian' | 'scout' | 'mediator';
 export type RegionalCircuitChoice = 'shield' | 'trace' | 'parley';
 export type RegionalCircuit = { prompt: string; host: string; choices: RegionalCircuitChoice[] };
-export type AcademyIntroChoice = 'shield' | 'trace' | 'challenge';
-export type AcademyIntroduction = { prompt: string; choices: AcademyIntroChoice[] };
+export type AcademyIntroChoice = 'shield' | 'trace' | 'challenge' | 'connect' | 'observe' | 'assert';
+/** Two short scenes give a new life a personal beginning without becoming a tutorial checklist. */
+export type AcademyIntroduction = { prompt: string; choices: AcademyIntroChoice[]; stage?: 0 | 1; openingChoice?: 'shield' | 'trace' | 'challenge' };
 export type FactionId = 'eclipse-covenant' | 'red-hands' | 'hunter-directorate' | 'ashen-lotus';
 export type FactionState = { id: FactionId; name: string; agenda: string; standing: number; heat: number };
 export type CareerCrisis = { defeatStreak: number; lastSetback?: string; warrant?: string };
