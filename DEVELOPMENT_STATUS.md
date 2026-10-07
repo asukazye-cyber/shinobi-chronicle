@@ -49,6 +49,7 @@
 
 ## Latest polish pass
 
+- **Flow/UI clarity:** the focused journey screen now surfaces one contextual “Próxima decisão” card and mission-readiness chips (priority, plan and optional preparation). The player can understand the current state without opening a new menu or reading every panel.
 - **Authored careers:** ANBU, Sensei, Commander and Missing-nin each now receive an authored A-rank identity operation and a later S-rank turning point, offered and resolved as ordinary missions. This broadens career variety without a separate campaign screen or management mode.
 - **Economy and progression:** village practice has a contextual field-proof plateau (completed missions raise it), so safe repetition cannot replace operations. Patrol pay, honor and village trust apply only while it solves genuine border tension; a calm frontier gives only a token payment. Neither rule adds an action quota or daily checklist.
 - **Tournament readability:** the active tournament presents a compact graphical player route (Quartas → Semifinal → Final), marking completed/current/future encounters and showing opponent OVR. It does not invent off-screen results for matches the simulation does not actually resolve.
