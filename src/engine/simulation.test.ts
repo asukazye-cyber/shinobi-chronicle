@@ -27,7 +27,7 @@ const runMission = (state: ReturnType<typeof createGame>) => {
 };
 const resolveTournament = (state: ReturnType<typeof createGame>) => {
   let s = state;
-  for (const choice of ['read', 'control', 'commit'] as const) s = applyCommand(s, { type: 'RESOLVE_TOURNAMENT_ROUND', choice }, content);
+  for (const choice of ['read', 'control', 'commit'] as const) { if (!s.tournament) break; s = applyCommand(s, { type: 'RESOLVE_TOURNAMENT_ROUND', choice }, content); }
   return s;
 };
 describe('content validation', () => {
@@ -196,12 +196,24 @@ describe('career simulation', () => {
   });
   it('creates a deterministic competitive roster and writes an annual OVR report without using OVR as combat resolution', () => {
     let s = genin(941); const assessment = assessCharacter(s, content);
-    expect(s.competitive?.rosters.Genin).toHaveLength(10);
+    expect(s.competitive?.rosters.Genin).toHaveLength(15);
+    expect(s.competitive?.rosters.Genin.filter(entry => entry.rival).map(entry => entry.name)).toEqual([s.rival.name]);
+    expect(s.competitive?.rosters.Jounin.filter(entry => entry.legend)).toHaveLength(4);
     expect(s.competitive?.rosters.Genin.every(entry => entry.age >= 10 && entry.age <= 15)).toBe(true);
     expect(assessment.overall).toBeGreaterThan(1);
     for (let season = 0; season < 4; season++) s = applyCommand(s, { type: 'ADVANCE_SEASON' }, content);
     expect(s.competitive?.annualReports).toHaveLength(1);
     expect(s.competitive?.annualReports[0].missionRecord).toContain('missões');
+  });
+  it('uses circuit points to qualify eight finalists while reserving promotion for the final top four', () => {
+    let s = genin(944);
+    s = { ...s, stats: { ...s.stats, successes: 3 }, character: { ...s.character, reputation: 4, geninFieldMark: 'guardian' } };
+    expect(() => applyCommand(s, { type: 'PROMOTE' }, content)).toThrow('oito melhores');
+    s = { ...s, competitive: { ...s.competitive!, playerPoints: 18, playerCircuitWins: 6, scoredResults: 6 } };
+    s = applyCommand(s, { type: 'PROMOTE' }, content);
+    expect(s.tournament?.qualifiers).toHaveLength(8);
+    expect(s.tournament?.qualifiers).toContain(s.rival.name);
+    expect(s.tournament?.entrants).toContain(s.rival.name);
   });
   it('lets a build cross-train disciplines and unlocks their technique branches without changing bloodline', () => {
     let s = genin(942); s = { ...s, stats: { ...s.stats, successes: 2 }, character: { ...s.character, specialization: 'tracker', disciplines: [], ryo: 180 } };
@@ -269,7 +281,7 @@ describe('career simulation', () => {
   it('keeps career promotion and a final legacy behind meaningful conditions', () => {
     let s = genin(4);
     expect(() => applyCommand(s, { type: 'END_CAREER' }, content)).toThrow('Chuunin');
-    s = { ...s, stats: { ...s.stats, successes: 3 }, character: { ...s.character, reputation: 4, attributes: Object.fromEntries(Object.keys(s.character.attributes).map(key => [key, 10])) as typeof s.character.attributes } };
+    s = { ...s, stats: { ...s.stats, successes: 3 }, competitive: { ...s.competitive!, playerPoints: 18, playerCircuitWins: 6, scoredResults: 6 }, character: { ...s.character, reputation: 4, attributes: Object.fromEntries(Object.keys(s.character.attributes).map(key => [key, 10])) as typeof s.character.attributes } };
     s = applyCommand(s, { type: 'START_REGIONAL_CIRCUIT' }, content);
     s = applyCommand(s, { type: 'RESOLVE_REGIONAL_CIRCUIT', choice: 'shield' }, content);
     s = applyCommand(s, { type: 'PROMOTE' }, content);
@@ -283,7 +295,7 @@ describe('career simulation', () => {
   });
   it('turns the Chuunin exam into a seeded regional bracket, not an automatic rank check', () => {
     let s = genin(515);
-    s = { ...s, stats: { ...s.stats, successes: 3 }, character: { ...s.character, reputation: 4, attributes: Object.fromEntries(Object.keys(s.character.attributes).map(key => [key, 10])) as typeof s.character.attributes } };
+    s = { ...s, stats: { ...s.stats, successes: 3 }, competitive: { ...s.competitive!, playerPoints: 18, playerCircuitWins: 6, scoredResults: 6 }, character: { ...s.character, reputation: 4, attributes: Object.fromEntries(Object.keys(s.character.attributes).map(key => [key, 10])) as typeof s.character.attributes } };
     s = applyCommand(s, { type: 'START_REGIONAL_CIRCUIT' }, content);
     s = applyCommand(s, { type: 'RESOLVE_REGIONAL_CIRCUIT', choice: 'trace' }, content);
     s = applyCommand(s, { type: 'PROMOTE' }, content);
@@ -291,7 +303,7 @@ describe('career simulation', () => {
     s = resolveTournament(s);
     expect(s.character.rank).toBe('Chuunin');
     expect(s.world.secrets.some(secret => secret.includes('Circuito Regional'))).toBe(true);
-    expect(s.chronicle.at(-1)?.text).toContain('Chave concluída');
+    expect(s.chronicle.at(-1)?.text).toContain('Fase final concluída');
   });
   it('makes the regional Genin circuit establish a flexible field signature before the Chuunin exam', () => {
     let s = genin(717);
@@ -314,7 +326,7 @@ describe('career simulation', () => {
   });
   it('uses a three-round international Jounin bracket instead of an automatic promotion', () => {
     let s = genin(617);
-    s = { ...s, stats: { ...s.stats, successes: 8 }, character: { ...s.character, rank: 'Chuunin', reputation: 12, attributes: Object.fromEntries(Object.keys(s.character.attributes).map(key => [key, 10])) as typeof s.character.attributes, loadout: ['binding-wire', 'scouts-eye', 'stone-guard', 'mist-step'] } };
+    s = { ...s, stats: { ...s.stats, successes: 8 }, competitive: { ...s.competitive!, playerPoints: 18, playerCircuitWins: 6, scoredResults: 6 }, character: { ...s.character, rank: 'Chuunin', reputation: 12, attributes: Object.fromEntries(Object.keys(s.character.attributes).map(key => [key, 10])) as typeof s.character.attributes, loadout: ['binding-wire', 'scouts-eye', 'stone-guard', 'mist-step'] } };
     s = applyCommand(s, { type: 'PROMOTE' }, content);
     expect(s.tournament?.kind).toBe('jounin');
     expect(s.tournament?.host).toBe('Cúpula das Cinco Rotas');

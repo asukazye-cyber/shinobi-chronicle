@@ -1,4 +1,5 @@
 import type { AnnualBaseline, AnnualReport, Attribute, CareerPath, Character, CombatApproach, CombatPlan, Command, Competitor, CompetitiveRank, CompetitiveState, Content, FactionId, GameState, Injury, Jutsu, Mentor, MissionHighlight, MissionOffer, MissionOpponent, MissionRank, MissionReport, Origin, Potential, Rank, Rival, Scar, Tag, TournamentChoice, Trait, VillageActivity } from '../domain/types';
+import lateCompetitors from '../data/late-competitors.json';
 import { roll } from './rng';
 import { simulationEvents } from './events';
 
@@ -59,12 +60,22 @@ export function developmentPlan(rank: Rank) { return { phase: rank, focus: [] as
 function fillLoadout(loadout: string[], slots: number): string[] { return [...loadout, ...defaultJutsu.filter(id => !loadout.includes(id))].slice(0, slots); }
 function initialProfile(seed: number): [Record<Attribute, number>, Trait, Potential, number] { let rng = seed; const attributes = Object.fromEntries(attributeKeys.map(key => [key, 3])) as Record<Attribute, number>; for (let i = 0; i < 3; i++) { let index: number; [index, rng] = roll(rng, attributeKeys.length); attributes[attributeKeys[index]]++; } let traitIndex: number, talentRoll: number, signatureIndex: number, weakIndex: number; [traitIndex, rng] = roll(rng, traits.length); [talentRoll, rng] = roll(rng, 100); const trait = traits[traitIndex]; const potential: Potential = { profile: talentRoll < 10 ? 'prodigy' : talentRoll < 25 ? 'late-bloomer' : 'ordinary', breakthrough: false }; if (potential.profile === 'prodigy') { [signatureIndex, rng] = roll(rng, attributeKeys.length); [weakIndex, rng] = roll(rng, attributeKeys.length); potential.specialty = attributeKeys[signatureIndex]; potential.blindSpot = attributeKeys[weakIndex]; attributes[attributeKeys[signatureIndex]] += 3; attributes[attributeKeys[weakIndex]]--; } if (potential.profile === 'late-bloomer') { for (let i = 0; i < 2; i++) { [weakIndex, rng] = roll(rng, attributeKeys.length); attributes[attributeKeys[weakIndex]]--; } } const floor = potential.profile === 'late-bloomer' ? 1 : 2, ceiling = potential.profile === 'prodigy' ? 7 : 5; for (const [key, delta] of Object.entries(trait.modifiers) as [Attribute, number][]) attributes[key] += delta; attributeKeys.forEach(key => attributes[key] = Math.max(floor, Math.min(ceiling, attributes[key]))); return [attributes, trait, potential, rng]; }
 function shinobiName(rngState: number): [string, number] { const roots = ['Aki', 'Hina', 'Kyo', 'Mio', 'Riku', 'Suzu', 'Taka', 'Yori', 'Fuyu', 'Nao', 'Kane', 'Shio', 'Rin', 'Tsuki']; const endings = ['ra', 'to', 'mi', 'ya', 'ko', 'shi', 'nori', 'ka', 'zen', 'ma']; let first: number, last: number, rng: number; [first, rng] = roll(rngState, roots.length); [last, rng] = roll(rng, endings.length); return [`${roots[first]}${endings[last]}`, rng]; }
-function beginTournament(state: GameState, kind: 'chuunin' | 'jounin'): GameState {
-  let rng = state.rngState; const entrants: string[] = [], roster = currentRoster(state, kind === 'chuunin' ? 'Genin' : 'Chuunin'), pool = [...roster];
-  for (let index = 0; index < 3; index++) { let selected: number; [selected, rng] = roll(rng, Math.max(1, pool.length)); const opponent = pool.splice(selected, 1)[0]; if (opponent) entrants.push(opponent.name); else { const [name, next] = shinobiName(rng); entrants.push(name); rng = next; } }
+function beginTournament(state: GameState, kind: 'chuunin' | 'jounin', content: Content): GameState {
+  let rng = state.rngState; const circuitRank: CompetitiveRank = kind === 'chuunin' ? 'Genin' : 'Chuunin';
+  const standing = circuitStanding(state, content, circuitRank);
+  const playerSeed = standing.findIndex(entry => entry.id === 'player') + 1;
+  if (playerSeed < 1 || playerSeed > 8) throw new Error('A fase final anual é reservada aos oito melhores do circuito.');
+  let qualifiers = standing.slice(0, 8).map(entry => entry.name);
+  // O rival atravessa os ranks: quando a tabela quase o deixa fora, entra como
+  // convidado de rivalidade em vez de virar um encontro aleatório descartável.
+  if (!qualifiers.includes(state.rival.name)) qualifiers = [...qualifiers.slice(0, 7), state.rival.name];
+  const pool = qualifiers.filter(name => name !== state.character.name && name !== state.rival.name);
+  const entrants: string[] = [];
+  for (let index = 0; index < 2; index++) { let selected: number; [selected, rng] = roll(rng, Math.max(1, pool.length)); const opponent = pool.splice(selected, 1)[0]; if (opponent) entrants.push(opponent); }
+  entrants.push(state.rival.name);
   const host = kind === 'chuunin' ? 'Vale das Pontes' : 'Cúpula das Cinco Rotas';
-  const prompt = kind === 'chuunin' ? 'Chave regional: quartas, semifinal e final misturam duelo, objetivo e julgamento de campo.' : 'Chave internacional: delegações observam três provas onde vencer sem critério também conta contra você.';
-  return note({ ...state, rngState: rng, tournament: { kind, host, entrants, round: 0, wins: 0, prompt, history: [] } }, 'tournament', `${kind === 'chuunin' ? 'Exame Chuunin' : 'Avaliação Jounin'} aberto em ${host}. A chave registra vitórias, mas também como você as conquistou.`);
+  const prompt = kind === 'chuunin' ? 'Os oito melhores do Circuito Regional entram na fase final. O título é único; as quatro melhores campanhas recebem promoção.' : 'Os oito melhores do circuito internacional disputam o título. A promoção considera temporada, fase final e critério de campo.';
+  return note({ ...state, rngState: rng, tournament: { kind, host, entrants, qualifiers, playerSeed, round: 0, wins: 0, prompt, history: [] } }, 'tournament', `${kind === 'chuunin' ? 'Final Regional Chuunin' : 'Final Internacional Jounin'} aberta em ${host}: cabeça de chave #${playerSeed}. O rival ${state.rival.name} está do outro lado da rota.`);
 }
 function resolveTournamentRound(state: GameState, choice: TournamentChoice, content: Content): GameState {
   const tournament = state.tournament, c = state.character;
@@ -79,12 +90,10 @@ function resolveTournamentRound(state: GameState, choice: TournamentChoice, cont
   const scout = competitor ? ` OVR ${competitor.overall} · ${competitor.profile} · ${competitor.age} anos.` : '';
   const record = `${roundName} contra ${opponent}:${scout} ${win ? 'vitória' : 'derrota com avaliação favorável'} por ${choice === 'read' ? 'leitura' : choice === 'control' ? 'controle' : 'comprometimento'}.`;
   const next = { ...tournament, round: (tournament.round + 1) as 0 | 1 | 2, wins: tournament.wins + Number(win), history: [...tournament.history, record] };
-  if (tournament.round < 2) return note({ ...state, rngState: rng, tournament: next }, 'tournament', record);
-  const isChuunin = tournament.kind === 'chuunin'; const rank = isChuunin ? 'Chuunin' : 'Jounin';
-  if (!next.wins) return note({ ...state, rngState: rng, tournament: undefined, character: { ...c, honor: c.honor + Number(choice === 'read' || choice === 'control') } }, 'tournament', `${record} Chave concluída sem vitória. Você ganha experiência e crônica, mas ainda não recebe a promoção; retorne após construir outra resposta de campo.`);
-  const reputation = isChuunin ? 1 + next.wins : 2 + next.wins;
-  const promoted: GameState = { ...state, rngState: rng, tournament: undefined, character: { ...c, rank, development: developmentPlan(rank), loadout: fillLoadout(c.loadout, loadoutSlots(rank)), knownJutsu: [...new Set([...c.knownJutsu, ...fillLoadout(c.loadout, loadoutSlots(rank))])], reputation: c.reputation + reputation, honor: c.honor + Number(choice === 'read' || choice === 'control') }, world: { ...state.world, councilTrust: state.world.councilTrust + Number(!isChuunin) + Number(next.wins >= 2), secrets: [...state.world.secrets, `${isChuunin ? 'O Circuito Regional' : 'A Cúpula Internacional'} registrou ${next.wins}/3 vitórias e sua forma de decidir sob observação.`] } };
-  return note(promoted, 'tournament', `${record} Chave concluída: ${next.wins}/3 vitórias. Você se torna ${rank}; o resultado abre novos focos e slots, mas a crônica registra como chegou lá.`);
+  // Em mata-mata uma derrota encerra a rota pessoal; a colocação final ainda
+  // considera a campanha inteira, evitando que uma única troca apague um ano.
+  if (!win || tournament.round === 2) return finishTournament({ ...state, rngState: rng, tournament: next }, choice, content, record);
+  return note({ ...state, rngState: rng, tournament: next }, 'tournament', record);
 }
 function originProfile(rngState: number): [Origin, Mentor, number] { let originIndex: number, mentorIndex: number, rng: number; [originIndex, rng] = roll(rngState, origins.length); [mentorIndex, rng] = roll(rng, mentors.length); const [name, nextRng] = shinobiName(rng); return [origins[originIndex], { ...mentors[mentorIndex], name, bond: 12, lessons: 0 }, nextRng]; }
 function homeVillage(rngState: number): [VillageProfile, number] { let index: number, rng: number; [index, rng] = roll(rngState, homeVillages.length); return [homeVillages[index], rng]; }
@@ -305,26 +314,97 @@ function annualBaseline(state: GameState, content?: Content): AnnualBaseline {
   const assessment = assessCharacter(state, content);
   return { year: Math.floor((state.world.season - 1) / 4) + 1, overall: assessment.overall, attributes: { ...state.character.attributes }, mastery: Object.values(state.character.mastery).reduce((total, value) => total + value, 0), missions: state.stats.missions, successes: state.stats.successes };
 }
-function createRoster(rngState: number, rank: CompetitiveRank): [Competitor[], number] {
+function createRoster(rngState: number, rank: CompetitiveRank, rival: Rival): [Competitor[], number] {
   const ranges: Record<CompetitiveRank, [number, number, number]> = { Genin: [12, 15, 44], Chuunin: [15, 18, 58], Jounin: [18, 21, 72] };
   const [minAge, maxAge, base] = ranges[rank]; let rng = rngState; const roster: Competitor[] = [];
   const profiles = ['Ofensivo', 'Controle', 'Sensor', 'Suporte', 'Furtivo', 'Versátil'];
-  for (let index = 0; index < 10; index++) {
+  // Quinze adversários + protagonista formam uma divisão enxuta de 16 posições.
+  // Só o rival principal recebe uma identidade recorrente; o resto sustenta o
+  // circuito sem virar uma lista de NPCs que o jogador precisa administrar.
+  for (let index = 0; index < 14; index++) {
     let name: string, ageRoll: number, overallRoll: number, profileRoll: number, formRoll: number, experienceRoll: number;
     [name, rng] = shinobiName(rng); [ageRoll, rng] = roll(rng, maxAge - minAge + 1); [overallRoll, rng] = roll(rng, 18); [profileRoll, rng] = roll(rng, profiles.length); [formRoll, rng] = roll(rng, 4); [experienceRoll, rng] = roll(rng, 4);
     const prodigy = index === 0 && overallRoll > 12; const age = prodigy ? Math.max(10, minAge - 2) : minAge + ageRoll;
     const overall = Math.min(96, base + overallRoll + (prodigy ? 8 : 0));
-    roster.push({ id: `${rank.toLowerCase()}-${index}`, name, village: homeVillages[index % homeVillages.length].name, age, rank, yearsInRank: prodigy ? 1 : 1 + experienceRoll, overall, profile: prodigy ? `${profiles[profileRoll]} · prodígio` : profiles[profileRoll], form: (['em ascensão', 'estável', 'em queda', 'lesionado'] as const)[formRoll], wins: 2 + Math.floor(overallRoll / 3), losses: 1 + (index % 4) });
+    roster.push({ id: `${rank.toLowerCase()}-${index}`, name, village: homeVillages[index % homeVillages.length].name, age, rank, yearsInRank: prodigy ? 1 : 1 + experienceRoll, overall, profile: prodigy ? `${profiles[profileRoll]} · prodígio` : profiles[profileRoll], form: (['em ascensão', 'estável', 'em queda', 'lesionado'] as const)[formRoll], wins: 2 + Math.floor(overallRoll / 3), losses: 1 + (index % 4), points: Math.floor(overallRoll / 5), circuitWins: 0, circuitLosses: 0 });
   }
-  return [roster.sort((a, b) => b.overall - a.overall || b.wins - a.wins), rng];
+  // Os doze personagens clássicos são um banco de convidados tardios. Quatro
+  // entram por carreira, determinados pela seed; os outros espaços seguem
+  // livres para rivalidade, criações autorais e competidores do mundo.
+  if (rank === 'Jounin') {
+    const legends = [...lateCompetitors];
+    for (let index = 0; index < 4; index++) {
+      let selected: number; [selected, rng] = roll(rng, legends.length);
+      const legend = legends.splice(selected, 1)[0];
+      roster[index] = { id: `legend-${legend.id}`, name: legend.name, village: legend.village, age: legend.age, rank, yearsInRank: 2, overall: legend.overall, profile: `Convidado tardio · ${legend.profile}`, form: 'estável', wins: 8, losses: 2, points: 5, circuitWins: 0, circuitLosses: 0, legend: true };
+    }
+  }
+  const rivalAge = rank === 'Genin' ? 13 : rank === 'Chuunin' ? 16 : 19;
+  roster.push({ id: `rival-${rank.toLowerCase()}`, name: rival.name, village: homeVillages[1].name, age: rivalAge, rank, yearsInRank: 1, overall: Math.min(96, base + 11), profile: `Rival · ${rival.style}`, form: 'em ascensão', wins: 5, losses: 1, points: 4, circuitWins: 0, circuitLosses: 0, rival: true });
+  return [roster.sort((a, b) => b.points - a.points || b.overall - a.overall || b.wins - a.wins), rng];
 }
 function createCompetitiveState(state: GameState): CompetitiveState {
   let rng = state.rngState; const rosters = {} as Record<CompetitiveRank, Competitor[]>;
-  for (const rank of competitiveRanks) { const [roster, next] = createRoster(rng, rank); rosters[rank] = roster; rng = next; }
-  return { rosters, baseline: annualBaseline(state), annualReports: [] };
+  for (const rank of competitiveRanks) { const [roster, next] = createRoster(rng, rank, state.rival); rosters[rank] = roster; rng = next; }
+  return { rosters, baseline: annualBaseline(state), annualReports: [], playerPoints: 0, playerCircuitWins: 0, playerCircuitLosses: 0, scoredResults: 0 };
 }
 function currentRoster(state: GameState, rank: CompetitiveRank): Competitor[] { return state.competitive?.rosters[rank] ?? []; }
-export function ensureCompetitiveState(state: GameState): GameState { if (!state.competitive) state.competitive = createCompetitiveState(state); return state; }
+function circuitStanding(state: GameState, content: Content, rank: CompetitiveRank) {
+  const competitive = state.competitive ?? createCompetitiveState(state);
+  const player = { id: 'player', name: state.character.name, overall: assessCharacter(state, content).overall, points: competitive.playerPoints ?? 0, wins: competitive.playerCircuitWins ?? 0, losses: competitive.playerCircuitLosses ?? 0, rival: false };
+  return [player, ...competitive.rosters[rank]].sort((left, right) => right.points - left.points || right.wins - left.wins || right.overall - left.overall || left.name.localeCompare(right.name));
+}
+function circuitPosition(state: GameState, content: Content, rank: CompetitiveRank): number { return circuitStanding(state, content, rank).findIndex(entry => entry.id === 'player') + 1; }
+export function ensureCompetitiveState(state: GameState): GameState {
+  if (!state.competitive) state.competitive = createCompetitiveState(state);
+  state.competitive.playerPoints ??= 0; state.competitive.playerCircuitWins ??= 0; state.competitive.playerCircuitLosses ??= 0; state.competitive.scoredResults ??= 0;
+  for (const [index, rank] of competitiveRanks.entries()) {
+    let roster = state.competitive.rosters[rank].map(entry => ({ ...entry, points: entry.points ?? 0, circuitWins: entry.circuitWins ?? 0, circuitLosses: entry.circuitLosses ?? 0 }));
+    const [fresh] = createRoster(state.seed + (index + 1) * 101, rank, state.rival);
+    const add = (entry: Competitor) => { if (roster.length < 15 && !roster.some(current => current.id === entry.id || current.name === entry.name)) roster.push(entry); };
+    add(fresh.find(entry => entry.rival)!);
+    if (rank === 'Jounin') {
+      const legends = fresh.filter(entry => entry.legend);
+      if (!roster.some(entry => entry.legend) && roster.length >= 15) {
+        const replaceable = roster.map((entry, position) => ({ entry, position })).filter(({ entry }) => !entry.rival).slice(-legends.length);
+        replaceable.forEach(({ position }, legend) => { roster[position] = legends[legend]; });
+      } else legends.forEach(add);
+    }
+    fresh.forEach(add); state.competitive.rosters[rank] = roster.slice(0, 15);
+  }
+  return state;
+}
+function creditCircuitMission(state: GameState, outcome: MissionReport['outcome']): GameState {
+  const rank = state.character.rank as CompetitiveRank;
+  if (!competitiveRanks.includes(rank) || !state.competitive || state.competitive.scoredResults >= 6) return state;
+  const points = outcome === 'success' ? 3 : outcome === 'partial' ? 1 : 0;
+  return { ...state, competitive: { ...state.competitive, playerPoints: state.competitive.playerPoints + points, playerCircuitWins: state.competitive.playerCircuitWins + Number(outcome === 'success'), playerCircuitLosses: state.competitive.playerCircuitLosses + Number(outcome === 'failure' || outcome === 'withdrawn'), scoredResults: state.competitive.scoredResults + 1 } };
+}
+function finishTournament(state: GameState, choice: TournamentChoice, content: Content, record: string): GameState {
+  const tournament = state.tournament!; const c = state.character; const isChuunin = tournament.kind === 'chuunin'; const nextRank: CompetitiveRank = isChuunin ? 'Chuunin' : 'Jounin';
+  const bonus = [1, 3, 5, 8][tournament.wins] ?? 1;
+  const rank: CompetitiveRank = isChuunin ? 'Genin' : 'Chuunin'; const roster = state.competitive!.rosters[rank];
+  const opponents = tournament.qualifiers.filter(name => name !== c.name).sort((left, right) => {
+    const a = roster.find(entry => entry.name === left), b = roster.find(entry => entry.name === right);
+    return (b?.points ?? 0) - (a?.points ?? 0) || (b?.overall ?? 0) - (a?.overall ?? 0) || left.localeCompare(right);
+  });
+  const playerPlacement = tournament.wins === 3 ? 0 : tournament.wins === 2 ? 1 : tournament.wins === 1 ? 2 : 4;
+  const finalOrder = [...opponents]; finalOrder.splice(playerPlacement, 0, c.name);
+  const finalAwards = [8, 5, 3, 3, 1, 1, 1, 1];
+  const champion = finalOrder[0] ?? 'campeão não registrado';
+  const finalRosters = { ...state.competitive!.rosters, [rank]: roster.map(entry => {
+    const place = finalOrder.indexOf(entry.name);
+    return place < 0 ? entry : { ...entry, points: entry.points + finalAwards[place], circuitWins: entry.circuitWins + Number(place <= 3), circuitLosses: entry.circuitLosses + Number(place > 3) };
+  }) };
+  const credited = { ...state, tournament: undefined, competitive: { ...state.competitive!, rosters: finalRosters, playerPoints: state.competitive!.playerPoints + bonus } };
+  const position = circuitPosition(credited, content, rank); const promoted = position <= 4;
+  const reputation = (isChuunin ? 1 : 2) + tournament.wins + Number(tournament.wins === 3);
+  const base = { ...credited, character: { ...c, reputation: c.reputation + reputation, honor: c.honor + Number(choice === 'read' || choice === 'control') + Number(tournament.wins === 3) }, world: { ...credited.world, councilTrust: credited.world.councilTrust + Number(!isChuunin) + Number(tournament.wins >= 2), secrets: [...credited.world.secrets, `${isChuunin ? 'O Circuito Regional' : 'A Cúpula Internacional'} registrou ${tournament.wins}/3 vitórias, ${bonus} ponto(s) de fase final e uma campanha na posição #${position}.`] }, competitive: { ...credited.competitive!, lastFinale: { rank, year: Math.floor((credited.world.season - 1) / 4) + 1, champion, playerPosition: position, promoted } } };
+  if (!promoted) return note(base, 'tournament', `${record} Fase final concluída: ${tournament.wins}/3 vitórias. ${champion} leva o título; sua campanha termina em #${position}. Só os quatro primeiros sobem, então o circuito continua aberto.`);
+  const loadout = fillLoadout(c.loadout, loadoutSlots(nextRank));
+  const promotedState: GameState = { ...base, character: { ...base.character, rank: nextRank, development: developmentPlan(nextRank), loadout, knownJutsu: [...new Set([...c.knownJutsu, ...loadout])] } };
+  return note(promotedState, 'tournament', `${record} Fase final concluída: ${champion === c.name ? 'você conquista o título' : `${champion} conquista o título`}. Sua campanha fecha em #${position}: promoção para ${nextRank} entre os quatro melhores.`);
+}
 export type BuildReadout = { roles: Tag[]; synergies: string[]; gaps: string[]; fieldIdentity: string[] };
 /** A human-readable account of what the equipped build can and cannot solve. */
 export function analyzeBuild(state: GameState, content: Content): BuildReadout {
@@ -772,6 +852,9 @@ function finishMission(state: GameState, outcome: MissionReport['outcome']): Gam
     next = { ...next, world: { ...next.world, storyFlags: [...new Set([...next.world.storyFlags, 'potential:late-bloomer:breakthrough'])], secrets: [...next.world.secrets, `A inclinação inicial para ${next.character.origin.latentTag} finalmente se revelou em campo.`] }, character: { ...next.character, potential: { ...next.character.potential, breakthrough: true, specialty: attribute }, attributes: { ...next.character.attributes, [attribute]: next.character.attributes[attribute] + 2 } } };
     next = note(next, 'potential', `Seu potencial tardio despertou após a terceira missão bem-sucedida: ${attribute} +2. O começo não definiu a sua carreira.`);
   }
+  // Só os seis primeiros resultados do ciclo pontuam. Missões continuam
+  // valiosas por história/build, mas não existe farm infinito de tabela.
+  next = creditCircuitMission(next, outcome);
   const highlight = missionHighlight(next, o, outcome);
   next = { ...next, lastReport: { ...report, highlight } };
   next = note(next, 'mission', `${o.rank}-rank ${o.title}: ${outcome}. ${reward} ryo; confiança da vila ${reputation >= 0 ? '+' : ''}${reputation}. ${highlight.title}.${o.arcId && outcome === 'success' ? ' Arco pessoal avançou.' : ''}`);
@@ -806,14 +889,15 @@ function closeCompetitiveYear(state: GameState, content: Content): GameState {
   for (const rank of competitiveRanks) rosters[rank] = competitive.rosters[rank].map(competitor => {
     let rollValue: number; [rollValue, rng] = roll(rng, 7); const delta = rollValue - 3 + Number(competitor.form === 'em ascensão') - Number(competitor.form === 'lesionado');
     const form: Competitor['form'] = delta >= 2 ? 'em ascensão' : delta <= -2 ? 'em queda' : rollValue === 0 ? 'lesionado' : 'estável';
-    return { ...competitor, age: competitor.age + Number(rollValue === 6), overall: Math.max(25, Math.min(99, competitor.overall + delta)), form, wins: competitor.wins + Number(delta >= 0), losses: competitor.losses + Number(delta < 0) };
-  }).sort((left, right) => right.overall - left.overall || right.wins - left.wins);
-  const rank = state.character.rank as CompetitiveRank, roster = competitiveRanks.includes(rank) ? rosters[rank] : [];
-  const position = [...roster.map(competitor => competitor.overall), assessment.overall].sort((left, right) => right - left).indexOf(assessment.overall) + 1;
+    const circuitWin = delta >= 0;
+    return { ...competitor, age: competitor.age + Number(rollValue === 6), overall: Math.max(25, Math.min(99, competitor.overall + delta)), form, wins: competitor.wins + Number(circuitWin), losses: competitor.losses + Number(!circuitWin), points: (competitor.points ?? 0) + (circuitWin ? 3 : 0), circuitWins: (competitor.circuitWins ?? 0) + Number(circuitWin), circuitLosses: (competitor.circuitLosses ?? 0) + Number(!circuitWin) };
+  }).sort((left, right) => right.points - left.points || right.wins - left.wins || right.overall - left.overall);
+  const rank = state.character.rank as CompetitiveRank;
+  const position = competitiveRanks.includes(rank) ? circuitPosition({ ...state, competitive: { ...competitive, rosters } }, content, rank) : 0;
   const changedAttributes = attributeKeys.filter(attribute => state.character.attributes[attribute] !== before.attributes[attribute]).map(attribute => `${attribute} ${state.character.attributes[attribute] > before.attributes[attribute] ? '+' : ''}${state.character.attributes[attribute] - before.attributes[attribute]}`);
   const mastery = Object.values(state.character.mastery).reduce((total, value) => total + value, 0), masteryGained = mastery - before.mastery, delta = assessment.overall - before.overall;
   const report: AnnualReport = { year: before.year, overall: assessment.overall, delta, trajectory: delta > 0 ? 'evolução' : delta < 0 ? 'regressão' : 'estável', changedAttributes, masteryGained, missionRecord: `${state.stats.successes - before.successes} sucessos em ${state.stats.missions - before.missions} missões`, circuitPosition: position, headline: delta > 0 ? 'A avaliação reconhece crescimento sustentado, não apenas um momento de forma.' : delta < 0 ? 'A temporada cobrou um preço; a avaliação registra o recuo sem apagar sua carreira.' : 'A avaliação vê estabilidade: sua identidade de campo se manteve.' };
-  const next = { ...state, rngState: rng, competitive: { rosters, baseline: annualBaseline(state, content), annualReports: [...competitive.annualReports.slice(-4), report] } };
+  const next = { ...state, rngState: rng, competitive: { ...competitive, rosters, baseline: annualBaseline(state, content), annualReports: [...competitive.annualReports.slice(-4), report] } };
   return note(next, 'annual-report', `Fim do ano ${report.year}: OVR ${before.overall} → ${report.overall} (${report.delta >= 0 ? '+' : ''}${report.delta}); ${report.missionRecord}.`);
 }
 function season(state: GameState, content: Content): GameState {
@@ -862,7 +946,7 @@ export function applyCommand(state: GameState, command: Command, content: Conten
   if (command.type === 'GRADUATE') { if (c.rank !== 'Academy') throw new Error('A Academia já ficou para trás.'); if (c.attributes.intelligence + c.attributes.handSeals < 8) throw new Error('A prova exige Inteligência + Selos ≥ 8.'); if (s.academyIntroduction) throw new Error('Antes da prova, viva seu primeiro exercício da Academia.'); c.rank = 'Genin'; c.development = developmentPlan('Genin'); c.loadout = fillLoadout(c.loadout, loadoutSlots(c.rank)); c.knownJutsu = [...new Set([...c.knownJutsu, ...c.loadout])]; s = days(s, 1); return note(s, 'career', `${c.name} se torna Genin. Escolha dois novos focos de desenvolvimento e monte o primeiro kit de campo.`); }
   if (command.type === 'START_REGIONAL_CIRCUIT') { if (c.rank !== 'Genin') throw new Error('O Circuito Regional é a primeira prova de campo de um Genin.'); if (c.geninFieldMark) throw new Error('Seu Circuito Regional já deixou uma assinatura de campo.'); if (s.regionalCircuit) throw new Error('O Circuito Regional já está em andamento.'); if (s.stats.successes < 2) throw new Error('O Circuito Regional abre após 2 missões bem-sucedidas.'); s.regionalCircuit = { host: 'Vale das Pontes', prompt: 'Três vilas entram no Circuito Regional. Um desabamento isola uma equipe visitante, um corredor carrega os mapas e mediadores rivais se acusam de sabotagem. Qual frente você assume?', choices: ['shield', 'trace', 'parley'] }; return note(s, 'career', 'Você entra no Circuito Regional do Vale das Pontes: uma prova entre vilas onde combate é só uma das respostas.'); }
   if (command.type === 'RESOLVE_REGIONAL_CIRCUIT') { const circuit = s.regionalCircuit; if (!circuit || c.rank !== 'Genin') throw new Error('Não há Circuito Regional pendente.'); const tags = tagsFor(content, s); const aligned = command.choice === 'shield' ? tags.has('defense') || tags.has('support') || c.attributes.stamina >= 5 : command.choice === 'trace' ? tags.has('perception') || tags.has('mobility') || tags.has('stealth') || c.attributes.speed >= 5 : tags.has('control') || tags.has('support') || c.attributes.intelligence >= 5; s = days(s, 2); const current = s.character; if (command.choice === 'shield') { current.geninFieldMark = 'guardian'; current.honor += 2; current.reputation += 1; } if (command.choice === 'trace') { current.geninFieldMark = 'scout'; current.reputation += 2; current.factionTrust.village += 1; } if (command.choice === 'parley') { current.geninFieldMark = 'mediator'; current.factionTrust.village += 1; current.factionTrust.underworld += 1; s.world.councilTrust += 1; } s.regionalCircuit = undefined; const markText = command.choice === 'shield' ? 'guardião' : command.choice === 'trace' ? 'batedor' : 'mediador'; return note(s, 'career', `No Circuito Regional, você se torna conhecido como ${markText}. ${aligned ? 'Sua build respondeu à crise de forma natural.' : 'Você venceu fora da resposta mais confortável da sua build.'} Isso influencia convites futuros, mas não fecha caminhos.`); }
-  if (command.type === 'PROMOTE') { if (c.rank === 'Genin') { if (s.stats.successes < 3 || c.reputation < 4) throw new Error('Chuunin exige 3 sucessos e reputação 4.'); if (!c.geninFieldMark) throw new Error('Antes do Exame Chuunin, participe do Circuito Regional Genin.'); if (s.tournament || s.chuuninExam) throw new Error('O Exame Chuunin já está em andamento; conclua a chave antes de outra promoção.'); return beginTournament(s, 'chuunin'); } if (c.rank === 'Chuunin') { if (s.stats.successes < 8 || c.reputation < 12 || Object.values(c.attributes).reduce((a, b) => a + b, 0) < 32) throw new Error('Jounin exige 8 sucessos, reputação 12 e atributos somados em 32.'); if (s.tournament) throw new Error('A Avaliação Jounin já está em andamento; conclua a chave internacional.'); return beginTournament(s, 'jounin'); } throw new Error('Não há promoção disponível.'); }
+  if (command.type === 'PROMOTE') { if (c.rank === 'Genin') { if (s.stats.successes < 3 || c.reputation < 4) throw new Error('Chuunin exige 3 sucessos e reputação 4.'); if (!c.geninFieldMark) throw new Error('Antes da final Chuunin, participe do Circuito Regional Genin.'); if (circuitPosition(s, content, 'Genin') > 8) throw new Error('A final anual exige terminar entre os oito melhores do circuito.'); if (s.tournament || s.chuuninExam) throw new Error('A Final Chuunin já está em andamento; conclua a chave antes de outra promoção.'); return beginTournament(s, 'chuunin', content); } if (c.rank === 'Chuunin') { if (s.stats.successes < 8 || c.reputation < 12 || Object.values(c.attributes).reduce((a, b) => a + b, 0) < 32) throw new Error('Jounin exige 8 sucessos, reputação 12 e atributos somados em 32.'); if (circuitPosition(s, content, 'Chuunin') > 8) throw new Error('A final internacional exige terminar entre os oito melhores do circuito.'); if (s.tournament) throw new Error('A Final Jounin já está em andamento; conclua a chave internacional.'); return beginTournament(s, 'jounin', content); } throw new Error('Não há promoção disponível.'); }
   if (command.type === 'RESOLVE_TOURNAMENT_ROUND') return resolveTournamentRound(s, command.choice, content);
   if (command.type === 'RESOLVE_CHUUNIN_EXAM') { const exam = s.chuuninExam; if (!exam || c.rank !== 'Genin') throw new Error('Não há Exame Chuunin pendente.'); const tags = tagsFor(content, s); const aligned = command.choice === 'rescue' ? tags.has('defense') || tags.has('support') || c.attributes.stamina >= 5 : command.choice === 'secure' ? tags.has('control') || tags.has('mobility') || c.attributes.handSeals >= 5 : tags.has('perception') || c.attributes.genjutsu >= 5 || c.attributes.intelligence >= 5; c.rank = 'Chuunin'; c.development = developmentPlan('Chuunin'); c.loadout = fillLoadout(c.loadout, loadoutSlots(c.rank)); c.knownJutsu = [...new Set([...c.knownJutsu, ...c.loadout])]; s.chuuninExam = undefined; if (command.choice === 'rescue') { c.honor += 2; c.reputation += 1; } if (command.choice === 'secure') { c.reputation += 2; s.world.councilTrust += 1; } if (command.choice === 'analyze') { c.factionTrust.village += 2; s.world.secrets.push('Você identificou o observador que testava o Exame Chuunin.'); } return note(s, 'career', `Você escolhe ${command.choice === 'rescue' ? 'salvar o mensageiro' : command.choice === 'secure' ? 'proteger o pergaminho' : 'ler o observador'}. ${aligned ? 'Sua preparação sustentou a decisão.' : 'A decisão custou mais porque sua build não era a resposta óbvia.'} Você se torna Chuunin, abre o quarto slot e define novos focos de desenvolvimento.`); }
   if (command.type === 'CHOOSE_CAREER_PATH') { if (c.careerPath) throw new Error('A nomeação de carreira já foi assumida nesta vida.'); const bond = c.relationships.find(r => r.id === 'sensei')!.bond + c.relationships.find(r => r.id === 'teammate')!.bond; if (command.path === 'rogue') { const crisisExit = s.world.careerCrisis.defeatStreak >= 3 || s.world.councilTrust <= -3 || Boolean(s.world.careerCrisis.warrant); if (!['Chuunin', 'Jounin'].includes(c.rank) || (c.notoriety < 7 && c.factionTrust.underworld < 7 && !crisisExit)) throw new Error('O caminho missing-nin exige Chuunin e uma ruptura real: notoriedade 7, submundo 7, maré de 3 derrotas ou dossiê do conselho.'); const reason = s.world.careerCrisis.warrant ? 'dossiê do conselho e caçada iminente' : s.world.careerCrisis.defeatStreak >= 3 ? 'uma maré de derrotas que destruiu a confiança formal' : s.world.councilTrust <= -3 ? 'ruptura pública com o conselho' : 'uma escolha consciente por redes paralelas'; c.careerPath = 'rogue'; c.factionTrust.village -= 4; c.notoriety += 3; s.world.missingNin = { reason, wantedLevel: c.notoriety >= 12 ? 3 : c.notoriety >= 8 ? 2 : 1, huntersAlerted: true }; s.world.factions = s.world.factions.map(faction => faction.id === 'hunter-directorate' ? { ...faction, heat: faction.heat + 3 } : faction.id === 'red-hands' ? { ...faction, standing: faction.standing + 2 } : faction); return note(s, 'career', `Você se torna missing-nin por ${reason}. A Diretoria de Caçadores abre a caçada; contratos futuros vêm por redes paralelas e têm outro preço.`); } if (c.rank !== 'Jounin') throw new Error('Nomeações ANBU, Sensei e Comando exigem Jounin.'); if (command.path === 'anbu' && (s.stats.successes < 12 || c.reputation < 16 || c.attributes.intelligence + c.attributes.willpower < 11)) throw new Error('ANBU exige 12 sucessos, reputação 16 e Inteligência + Vontade 11.'); if (command.path === 'sensei' && (s.stats.successes < 10 || c.honor < 10 || bond < 45)) throw new Error('Sensei exige 10 sucessos, honra 10 e vínculos somados 45.'); if (command.path === 'commander' && (s.stats.successes < 12 || c.reputation < 18 || s.world.councilTrust < 8)) throw new Error('Comando exige 12 sucessos, reputação 18 e confiança do conselho 8.'); c.careerPath = command.path; return note(s, 'career', command.path === 'anbu' ? 'Você aceita uma máscara ANBU: informação e silêncio passam a definir suas operações.' : command.path === 'sensei' ? 'Você assume uma turma: sustentar outros se torna parte do seu próprio campo.' : 'Você recebe comando de campo: proteger a linha importa mais que brilho individual.'); }

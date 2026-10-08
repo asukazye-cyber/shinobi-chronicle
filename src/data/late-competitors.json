@@ -1,0 +1,14 @@
+[
+  {"id":"naruto-uzumaki","name":"Naruto Uzumaki","village":"Konohagakure","age":20,"overall":90,"profile":"pressão, clones e resistência"},
+  {"id":"sasuke-uchiha","name":"Sasuke Uchiha","village":"Konohagakure","age":20,"overall":91,"profile":"velocidade, ocular e contra-ataque"},
+  {"id":"sakura-haruno","name":"Sakura Haruno","village":"Konohagakure","age":20,"overall":85,"profile":"impacto, suporte e recuperação"},
+  {"id":"shikamaru-nara","name":"Shikamaru Nara","village":"Konohagakure","age":21,"overall":86,"profile":"controle, leitura e comando"},
+  {"id":"ino-yamanaka","name":"Ino Yamanaka","village":"Konohagakure","age":20,"overall":80,"profile":"mente, suporte e informação"},
+  {"id":"choji-akimichi","name":"Chōji Akimichi","village":"Konohagakure","age":20,"overall":82,"profile":"pressão, resistência e proteção"},
+  {"id":"hinata-hyuga","name":"Hinata Hyūga","village":"Konohagakure","age":20,"overall":84,"profile":"percepção, tenketsu e defesa"},
+  {"id":"kiba-inuzuka","name":"Kiba Inuzuka","village":"Konohagakure","age":20,"overall":79,"profile":"rastro, mobilidade e perseguição"},
+  {"id":"shino-aburame","name":"Shino Aburame","village":"Konohagakure","age":20,"overall":82,"profile":"controle, desgaste e leitura"},
+  {"id":"rock-lee","name":"Rock Lee","village":"Konohagakure","age":20,"overall":85,"profile":"taijutsu, ritmo e portões"},
+  {"id":"neji-hyuga","name":"Neji Hyūga","village":"Konohagakure","age":20,"overall":87,"profile":"percepção, precisão e defesa"},
+  {"id":"tenten","name":"Tenten","village":"Konohagakure","age":20,"overall":78,"profile":"arsenal, controle e alcance"}
+]
