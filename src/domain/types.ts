@@ -40,7 +40,8 @@ export type TournamentChoice = 'read' | 'control' | 'commit';
 export type Tournament = { kind: TournamentKind; host: string; entrants: string[]; qualifiers: string[]; playerSeed: number; round: 0 | 1 | 2; wins: number; prompt: string; history: string[] };
 export type CompetitiveRank = 'Genin' | 'Chuunin' | 'Jounin';
 export type CompetitorForm = 'em ascensão' | 'estável' | 'em queda' | 'lesionado';
-export type Competitor = { id: string; name: string; village: string; age: number; rank: CompetitiveRank; yearsInRank: number; overall: number; profile: string; form: CompetitorForm; wins: number; losses: number; points: number; circuitWins: number; circuitLosses: number; rival?: boolean; legend?: boolean };
+/** `portraitId` resolves to /assets/portraits/<portraitId>.webp; missing art falls back gracefully. */
+export type Competitor = { id: string; portraitId: string; name: string; village: string; age: number; rank: CompetitiveRank; yearsInRank: number; overall: number; profile: string; form: CompetitorForm; wins: number; losses: number; points: number; circuitWins: number; circuitLosses: number; rival?: boolean; legend?: boolean };
 export type AnnualBaseline = { year: number; overall: number; attributes: Record<Attribute, number>; mastery: number; missions: number; successes: number };
 export type AnnualReport = { year: number; overall: number; delta: number; trajectory: 'evolução' | 'regressão' | 'estável'; changedAttributes: string[]; masteryGained: number; missionRecord: string; circuitPosition: number; headline: string };
 export type CompetitiveState = { rosters: Record<CompetitiveRank, Competitor[]>; baseline: AnnualBaseline; annualReports: AnnualReport[]; playerPoints: number; playerCircuitWins: number; playerCircuitLosses: number; scoredResults: number; lastFinale?: { rank: CompetitiveRank; year: number; champion: string; playerPosition: number; promoted: boolean } };

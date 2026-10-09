@@ -199,6 +199,8 @@ describe('career simulation', () => {
     expect(s.competitive?.rosters.Genin).toHaveLength(15);
     expect(s.competitive?.rosters.Genin.filter(entry => entry.rival).map(entry => entry.name)).toEqual([s.rival.name]);
     expect(s.competitive?.rosters.Jounin.filter(entry => entry.legend)).toHaveLength(4);
+    expect(s.competitive?.rosters.Genin.every(entry => entry.portraitId.includes('genin') || entry.portraitId.includes('rival'))).toBe(true);
+    expect(s.competitive?.rosters.Jounin.filter(entry => entry.legend).every(entry => !entry.portraitId.includes(String(s.seed)))).toBe(true);
     expect(s.competitive?.rosters.Genin.every(entry => entry.age >= 10 && entry.age <= 15)).toBe(true);
     expect(assessment.overall).toBeGreaterThan(1);
     for (let season = 0; season < 4; season++) s = applyCommand(s, { type: 'ADVANCE_SEASON' }, content);

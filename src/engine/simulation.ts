@@ -314,7 +314,7 @@ function annualBaseline(state: GameState, content?: Content): AnnualBaseline {
   const assessment = assessCharacter(state, content);
   return { year: Math.floor((state.world.season - 1) / 4) + 1, overall: assessment.overall, attributes: { ...state.character.attributes }, mastery: Object.values(state.character.mastery).reduce((total, value) => total + value, 0), missions: state.stats.missions, successes: state.stats.successes };
 }
-function createRoster(rngState: number, rank: CompetitiveRank, rival: Rival): [Competitor[], number] {
+function createRoster(rngState: number, rank: CompetitiveRank, rival: Rival, portraitSeed: number): [Competitor[], number] {
   const ranges: Record<CompetitiveRank, [number, number, number]> = { Genin: [12, 15, 44], Chuunin: [15, 18, 58], Jounin: [18, 21, 72] };
   const [minAge, maxAge, base] = ranges[rank]; let rng = rngState; const roster: Competitor[] = [];
   const profiles = ['Ofensivo', 'Controle', 'Sensor', 'Suporte', 'Furtivo', 'Versátil'];
@@ -326,7 +326,7 @@ function createRoster(rngState: number, rank: CompetitiveRank, rival: Rival): [C
     [name, rng] = shinobiName(rng); [ageRoll, rng] = roll(rng, maxAge - minAge + 1); [overallRoll, rng] = roll(rng, 18); [profileRoll, rng] = roll(rng, profiles.length); [formRoll, rng] = roll(rng, 4); [experienceRoll, rng] = roll(rng, 4);
     const prodigy = index === 0 && overallRoll > 12; const age = prodigy ? Math.max(10, minAge - 2) : minAge + ageRoll;
     const overall = Math.min(96, base + overallRoll + (prodigy ? 8 : 0));
-    roster.push({ id: `${rank.toLowerCase()}-${index}`, name, village: homeVillages[index % homeVillages.length].name, age, rank, yearsInRank: prodigy ? 1 : 1 + experienceRoll, overall, profile: prodigy ? `${profiles[profileRoll]} · prodígio` : profiles[profileRoll], form: (['em ascensão', 'estável', 'em queda', 'lesionado'] as const)[formRoll], wins: 2 + Math.floor(overallRoll / 3), losses: 1 + (index % 4), points: Math.floor(overallRoll / 5), circuitWins: 0, circuitLosses: 0 });
+    roster.push({ id: `${rank.toLowerCase()}-${index}`, portraitId: `${rank.toLowerCase()}-${portraitSeed}-${index}`, name, village: homeVillages[index % homeVillages.length].name, age, rank, yearsInRank: prodigy ? 1 : 1 + experienceRoll, overall, profile: prodigy ? `${profiles[profileRoll]} · prodígio` : profiles[profileRoll], form: (['em ascensão', 'estável', 'em queda', 'lesionado'] as const)[formRoll], wins: 2 + Math.floor(overallRoll / 3), losses: 1 + (index % 4), points: Math.floor(overallRoll / 5), circuitWins: 0, circuitLosses: 0 });
   }
   // Os doze personagens clássicos são um banco de convidados tardios. Quatro
   // entram por carreira, determinados pela seed; os outros espaços seguem
@@ -336,16 +336,16 @@ function createRoster(rngState: number, rank: CompetitiveRank, rival: Rival): [C
     for (let index = 0; index < 4; index++) {
       let selected: number; [selected, rng] = roll(rng, legends.length);
       const legend = legends.splice(selected, 1)[0];
-      roster[index] = { id: `legend-${legend.id}`, name: legend.name, village: legend.village, age: legend.age, rank, yearsInRank: 2, overall: legend.overall, profile: `Convidado tardio · ${legend.profile}`, form: 'estável', wins: 8, losses: 2, points: 5, circuitWins: 0, circuitLosses: 0, legend: true };
+      roster[index] = { id: `legend-${legend.id}`, portraitId: legend.id, name: legend.name, village: legend.village, age: legend.age, rank, yearsInRank: 2, overall: legend.overall, profile: `Convidado tardio · ${legend.profile}`, form: 'estável', wins: 8, losses: 2, points: 5, circuitWins: 0, circuitLosses: 0, legend: true };
     }
   }
   const rivalAge = rank === 'Genin' ? 13 : rank === 'Chuunin' ? 16 : 19;
-  roster.push({ id: `rival-${rank.toLowerCase()}`, name: rival.name, village: homeVillages[1].name, age: rivalAge, rank, yearsInRank: 1, overall: Math.min(96, base + 11), profile: `Rival · ${rival.style}`, form: 'em ascensão', wins: 5, losses: 1, points: 4, circuitWins: 0, circuitLosses: 0, rival: true });
+  roster.push({ id: `rival-${rank.toLowerCase()}`, portraitId: `rival-${portraitSeed}-${rank.toLowerCase()}`, name: rival.name, village: homeVillages[1].name, age: rivalAge, rank, yearsInRank: 1, overall: Math.min(96, base + 11), profile: `Rival · ${rival.style}`, form: 'em ascensão', wins: 5, losses: 1, points: 4, circuitWins: 0, circuitLosses: 0, rival: true });
   return [roster.sort((a, b) => b.points - a.points || b.overall - a.overall || b.wins - a.wins), rng];
 }
 function createCompetitiveState(state: GameState): CompetitiveState {
   let rng = state.rngState; const rosters = {} as Record<CompetitiveRank, Competitor[]>;
-  for (const rank of competitiveRanks) { const [roster, next] = createRoster(rng, rank, state.rival); rosters[rank] = roster; rng = next; }
+  for (const rank of competitiveRanks) { const [roster, next] = createRoster(rng, rank, state.rival, state.seed); rosters[rank] = roster; rng = next; }
   return { rosters, baseline: annualBaseline(state), annualReports: [], playerPoints: 0, playerCircuitWins: 0, playerCircuitLosses: 0, scoredResults: 0 };
 }
 function currentRoster(state: GameState, rank: CompetitiveRank): Competitor[] { return state.competitive?.rosters[rank] ?? []; }
@@ -360,7 +360,15 @@ export function ensureCompetitiveState(state: GameState): GameState {
   state.competitive.playerPoints ??= 0; state.competitive.playerCircuitWins ??= 0; state.competitive.playerCircuitLosses ??= 0; state.competitive.scoredResults ??= 0;
   for (const [index, rank] of competitiveRanks.entries()) {
     let roster = state.competitive.rosters[rank].map(entry => ({ ...entry, points: entry.points ?? 0, circuitWins: entry.circuitWins ?? 0, circuitLosses: entry.circuitLosses ?? 0 }));
-    const [fresh] = createRoster(state.seed + (index + 1) * 101, rank, state.rival);
+    roster = roster.map(entry => ({
+      ...entry,
+      portraitId: entry.portraitId ?? (entry.rival
+        ? `rival-${state.seed}-${rank.toLowerCase()}`
+        : entry.legend
+          ? entry.id.replace('legend-', '')
+          : `${rank.toLowerCase()}-${state.seed}-${entry.id}`)
+    }));
+    const [fresh] = createRoster(state.seed + (index + 1) * 101, rank, state.rival, state.seed);
     const add = (entry: Competitor) => { if (roster.length < 15 && !roster.some(current => current.id === entry.id || current.name === entry.name)) roster.push(entry); };
     add(fresh.find(entry => entry.rival)!);
     if (rank === 'Jounin') {
