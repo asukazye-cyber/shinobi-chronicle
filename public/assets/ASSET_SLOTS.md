@@ -38,10 +38,9 @@ arquivos ausentes mantêm o fallback textual do jogo.
 
 ## Retratos — 1024 × 1024 WebP
 
-Retratos são slots de elenco, não uma lista universal fixa. Ao criar ou abrir
-uma vida, o jogo mostra o nome exato de cada arquivo em **Circuito → Diretório
-de retratos deste elenco**. Isso inclui personagem, rival e os concorrentes
-daquele seed. Os convidados tardios têm slots permanentes, por exemplo
-`portraits/naruto-uzumaki.webp`.
+Retratos usam uma escala universal fixa em toda carreira. A lista integral,
+com todos os nomes de arquivo e as três fases do rival, está em
+`portraits/ROSTER.md`. Apenas `portraits/player-custom.webp` muda quando você
+quiser trocar a arte do protagonista.
 
 Consulte `README.md` para enquadramento, tamanho e nomenclatura.

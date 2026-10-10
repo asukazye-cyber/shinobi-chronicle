@@ -24,9 +24,14 @@ public/assets/portraits/naruto-uzumaki.webp
   padrão de cenários, cenas, ícones e texturas.
 
 Enquanto não existe arquivo, o jogo mostra as iniciais do personagem como
-placeholder. O painel **Diretório de retratos deste elenco** lista todos os
-nomes de arquivo da vida atual, incluindo protagonista, rival e competidores.
+placeholder. O painel **Diretório de retratos deste elenco** lista a mesma
+escala fixa em toda carreira. A única arte opcionalmente trocável é a do
+protagonista:
 
-Os nomes de shinobi gerados são definidos pela seed da vida; por isso seus
-slots incluem a seed. Os quatro convidados Jounin do pool tardio usam slots
-fixos, como `naruto-uzumaki.webp` e `rock-lee.webp`.
+```text
+player-custom.webp
+```
+
+Substitua esse arquivo quando quiser trocar o retrato do seu personagem. Todo
+o restante do elenco, incluindo o rival, possui nome e slot permanentes. A
+lista completa está em `ROSTER.md`.
