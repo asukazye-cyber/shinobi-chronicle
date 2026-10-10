@@ -18,8 +18,10 @@ public/assets/portraits/naruto-uzumaki.webp
 
 - Formato: WebP com fundo opaco ou transparente.
 - Proporção: 1:1.
-- Tamanho recomendado: 512 × 512 px (o jogo reduz para a tabela quando necessário).
+- Tamanho oficial: 1024 × 1024 px (o jogo reduz para a tabela quando necessário).
 - Deixe rosto e ombros dentro da área central; os cartões recortam a imagem em círculo.
+- Peso recomendado: até 250 KB por retrato. Consulte `../README.md` para o
+  padrão de cenários, cenas, ícones e texturas.
 
 Enquanto não existe arquivo, o jogo mostra as iniciais do personagem como
 placeholder. O painel **Diretório de retratos deste elenco** lista todos os
