@@ -7,12 +7,12 @@ protagonista criado pelo jogador e pode ser substituído livremente.
 
 ```text
 player-custom.webp
-rival-akio-kazanami-genin.webp
-rival-akio-kazanami-chuunin.webp
-rival-akio-kazanami-jounin.webp
+rival-reiji-iwamine-genin.webp
+rival-reiji-iwamine-chuunin.webp
+rival-reiji-iwamine-jounin.webp
 ```
 
-Akio Kazanami é o rival recorrente; os três retratos mostram sua evolução de
+Reiji Iwamine é o rival recorrente; os três retratos mostram sua evolução de
 idade e patente, não três pessoas diferentes.
 
 ## Convenção de nomes

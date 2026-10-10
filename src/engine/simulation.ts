@@ -28,7 +28,7 @@ const origins: Origin[] = [
   { academyMemory: 'enfermaria de treino', latentTag: 'support', description: 'Após um acidente de treino, você entendeu o valor de manter alguém em campo.' },
   { academyMemory: 'pátio silencioso', latentTag: 'stealth', description: 'Você era capaz de atravessar o pátio após o toque de recolher sem acordar um único vigia.' }
 ];
-const fixedRival: Omit<Rival, 'rank' | 'reputation' | 'rivalry' | 'stage' | 'stance' | 'lastEncounterDay' | 'studiedStages' | 'memory'> = { name: 'Akio Kazanami', style: 'corte de vento e avanço', affinity: 'Vento', preferredTag: 'mobility' };
+const fixedRival: Omit<Rival, 'rank' | 'reputation' | 'rivalry' | 'stage' | 'stance' | 'lastEncounterDay' | 'studiedStages' | 'memory'> = { name: 'Reiji Iwamine', style: 'corte de vento e avanço', affinity: 'Vento', preferredTag: 'mobility' };
 const defaultJutsu = ['binding-wire', 'scouts-eye', 'stone-guard', 'mist-step', 'warding-palm'];
 type ArcStage = 'first' | 'second' | 'final';
 type VillageThread = { activity: VillageActivity; lead: string; stages: Record<ArcStage, [string, string, string, number, string]> };
@@ -314,7 +314,7 @@ function createRoster(rngState: number, rank: CompetitiveRank, rival: Rival): [C
   };
   const roster: Competitor[] = canonicalRosters[rank].map(entry => ({ ...entry, rank, circuitWins: 0, circuitLosses: 0 }));
   const stage = rivalStage[rank];
-  roster.push({ id: `rival-${rank.toLowerCase()}`, portraitId: `rival-akio-kazanami-${rank.toLowerCase()}`, name: rival.name, village: 'Kazan', age: stage.age, rank, yearsInRank: stage.yearsInRank, overall: stage.overall, profile: `Rival · ${rival.style}`, form: 'em ascensão', wins: 7 + stage.yearsInRank, losses: 1, points: 6, circuitWins: 0, circuitLosses: 0, rival: true });
+  roster.push({ id: `rival-${rank.toLowerCase()}`, portraitId: `rival-reiji-iwamine-${rank.toLowerCase()}`, name: rival.name, village: 'Kazan', age: stage.age, rank, yearsInRank: stage.yearsInRank, overall: stage.overall, profile: `Rival · ${rival.style}`, form: 'em ascensão', wins: 7 + stage.yearsInRank, losses: 1, points: 6, circuitWins: 0, circuitLosses: 0, rival: true });
   return [roster.sort((a, b) => b.points - a.points || b.overall - a.overall || b.wins - a.wins), rngState];
 }
 function createCompetitiveState(state: GameState): CompetitiveState {

@@ -678,9 +678,9 @@ describe('career simulation', () => {
     const sameA = createGame('Aki', 611), sameB = createGame('Aki', 611), different = createGame('Aki', 612);
     expect(sameA.character.mentor.name).toBe(sameB.character.mentor.name);
     expect(sameA.rival.name).toBe(sameB.rival.name);
-    expect(sameA.rival.name).toBe('Akio Kazanami');
-    expect(different.rival.name).toBe('Akio Kazanami');
-    expect(sameA.npcs.map(npc => npc.name)).toEqual(['Toma Shiosaki', 'Mira Hoshino', 'Akio Kazanami']);
+    expect(sameA.rival.name).toBe('Reiji Iwamine');
+    expect(different.rival.name).toBe('Reiji Iwamine');
+    expect(sameA.npcs.map(npc => npc.name)).toEqual(['Toma Shiosaki', 'Mira Hoshino', 'Reiji Iwamine']);
     expect(sameA.character.attributes).not.toEqual(different.character.attributes);
   });
 });
