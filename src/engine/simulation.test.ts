@@ -201,7 +201,7 @@ describe('career simulation', () => {
     expect(s.competitive?.rosters.Genin.filter(entry => entry.rival).map(entry => entry.name)).toEqual([s.rival.name]);
     expect(s.competitive?.rosters.Jounin.filter(entry => entry.legend)).toHaveLength(4);
     expect(s.competitive?.rosters.Genin.map(entry => entry.name)).toEqual(otherLife.competitive?.rosters.Genin.map(entry => entry.name));
-    expect(s.competitive?.rosters.Genin.some(entry => entry.portraitId === 'genin-yuna-morita')).toBe(true);
+    expect(s.competitive?.rosters.Genin.some(entry => entry.portraitId === 'genin-hina-amatsuki')).toBe(true);
     expect(s.competitive?.rosters.Genin.every(entry => entry.portraitId.includes('genin') || entry.portraitId.includes('rival'))).toBe(true);
     expect(s.competitive?.rosters.Jounin.filter(entry => entry.legend).every(entry => !entry.portraitId.includes(String(s.seed)))).toBe(true);
     expect(s.competitive?.rosters.Genin.every(entry => entry.age >= 10 && entry.age <= 15)).toBe(true);
@@ -678,9 +678,9 @@ describe('career simulation', () => {
     const sameA = createGame('Aki', 611), sameB = createGame('Aki', 611), different = createGame('Aki', 612);
     expect(sameA.character.mentor.name).toBe(sameB.character.mentor.name);
     expect(sameA.rival.name).toBe(sameB.rival.name);
-    expect(sameA.rival.name).toBe('Akio Kazehaya');
-    expect(different.rival.name).toBe('Akio Kazehaya');
-    expect(sameA.npcs.map(npc => npc.name)).toEqual(['Toma', 'Mira', 'Akio Kazehaya']);
+    expect(sameA.rival.name).toBe('Akio Kazanami');
+    expect(different.rival.name).toBe('Akio Kazanami');
+    expect(sameA.npcs.map(npc => npc.name)).toEqual(['Toma Shiosaki', 'Mira Hoshino', 'Akio Kazanami']);
     expect(sameA.character.attributes).not.toEqual(different.character.attributes);
   });
 });

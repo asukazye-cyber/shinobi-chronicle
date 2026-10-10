@@ -15,11 +15,11 @@ const traits: Trait[] = [
   { id: 'contemplative', name: 'Contemplativo', description: 'Excelente leitura mental, mas menos explosivo em ninjutsu.', modifiers: { intelligence: 1, willpower: 1, ninjutsu: -1 } }
 ];
 const mentors: Omit<Mentor, 'bond' | 'lessons'>[] = [
-  { id: 'sena', name: 'Sena Kisaragi', doctrine: 'guardian', description: 'Ensina que uma linha protegida vale mais que uma vitória chamativa.' },
-  { id: 'rei', name: 'Rei Fushimi', doctrine: 'pathfinder', description: 'Ensina a ler o caminho que ninguém pensou em usar.' },
-  { id: 'kaito', name: 'Kaito Makabe', doctrine: 'seal-mentor', description: 'Ensina que toda técnica forte começa com uma condição bem entendida.' },
-  { id: 'nari', name: 'Nari Tachibana', doctrine: 'vanguard-mentor', description: 'Ensina a assumir o risco que abre uma janela para a equipe.' },
-  { id: 'aya', name: 'Aya Kureha', doctrine: 'field-healer', description: 'Ensina que resgate, triagem e ritmo também vencem operações.' }
+  { id: 'sena', name: 'Sena Tsukikage', doctrine: 'guardian', description: 'Ensina que uma linha protegida vale mais que uma vitória chamativa.' },
+  { id: 'rei', name: 'Rei Kazehara', doctrine: 'pathfinder', description: 'Ensina a ler o caminho que ninguém pensou em usar.' },
+  { id: 'kaito', name: 'Kaito Tetsumori', doctrine: 'seal-mentor', description: 'Ensina que toda técnica forte começa com uma condição bem entendida.' },
+  { id: 'nari', name: 'Nari Iwamine', doctrine: 'vanguard-mentor', description: 'Ensina a assumir o risco que abre uma janela para a equipe.' },
+  { id: 'aya', name: 'Aya Shiosaki', doctrine: 'field-healer', description: 'Ensina que resgate, triagem e ritmo também vencem operações.' }
 ];
 const origins: Origin[] = [
   { academyMemory: 'arquivo inundado', latentTag: 'perception', description: 'Na Academia, você salvou cadernos de um arquivo inundado e aprendeu a ler o que quase se perdeu.' },
@@ -28,7 +28,7 @@ const origins: Origin[] = [
   { academyMemory: 'enfermaria de treino', latentTag: 'support', description: 'Após um acidente de treino, você entendeu o valor de manter alguém em campo.' },
   { academyMemory: 'pátio silencioso', latentTag: 'stealth', description: 'Você era capaz de atravessar o pátio após o toque de recolher sem acordar um único vigia.' }
 ];
-const fixedRival: Omit<Rival, 'rank' | 'reputation' | 'rivalry' | 'stage' | 'stance' | 'lastEncounterDay' | 'studiedStages' | 'memory'> = { name: 'Akio Kazehaya', style: 'corte de vento e avanço', affinity: 'Vento', preferredTag: 'mobility' };
+const fixedRival: Omit<Rival, 'rank' | 'reputation' | 'rivalry' | 'stage' | 'stance' | 'lastEncounterDay' | 'studiedStages' | 'memory'> = { name: 'Akio Kazanami', style: 'corte de vento e avanço', affinity: 'Vento', preferredTag: 'mobility' };
 const defaultJutsu = ['binding-wire', 'scouts-eye', 'stone-guard', 'mist-step', 'warding-palm'];
 type ArcStage = 'first' | 'second' | 'final';
 type VillageThread = { activity: VillageActivity; lead: string; stages: Record<ArcStage, [string, string, string, number, string]> };
@@ -178,7 +178,7 @@ function spendVillageDay(state: GameState, activity: VillageActivity, content: C
 export function createGame(name: string, seed = 1337): GameState {
   const stats = { missions: 0, successes: 0, partials: 0, failures: 0, trainings: 0, relationshipsDeepened: 0, ryoEarned: 0, daysServed: 0, highestMission: 'E' as MissionRank };
   const [attributes, trait, potential, profileRng] = initialProfile(seed); const [village, villageRng] = homeVillage(profileRng); const [baseOrigin, mentor, mentorRng] = originProfile(villageRng); const origin = { ...baseOrigin, description: `${baseOrigin.description} Em ${village.name}, ${village.academyFrame}.` }; const [rival, rngState] = rivalProfile(mentorRng);
-  const state: GameState = { saveVersion: 1, seed, stats, rngState, rival, world: { season: 1, borderTension: 2, councilTrust: 0, localIntel: 0, rumors: [village.rumor], secrets: [], storyFlags: [`home:${village.id}`], factions: defaultFactions(), careerCrisis: { defeatStreak: 0 } }, npcs: [{ id: 'toma', name: 'Toma', role: 'medic', bond: 10, status: 'available', goal: 'provar que suporte também decide batalhas', memory: 'deixou uma anotação de primeiros socorros no seu caderno', arcStage: 0 }, { id: 'mira', name: 'Mira', role: 'scout', bond: 3, status: 'available', goal: `mapear rotas que ninguém patrulha em ${village.name}`, memory: 'observa antes de confiar', arcStage: 0 }, { id: 'rival', name: rival.name, role: 'rival', bond: -8, status: 'available', goal: 'superar cada expectativa da família', memory: 'transforma reconhecimento em competição', arcStage: 0 }], team: { memberIds: ['toma'], cohesion: 10 }, character: { name: name || 'Ren', village: village.name, rank: 'Academy', day: 1, attributes, trait, potential, origin, mentor, development: developmentPlan('Academy'), chakraPool: attributes.stamina * 10 + attributes.chakraControl * 2, health: 100, ryo: 30, inventory: { antidote: 0, 'sealing-slate': 0 }, research: { sealing: 0 }, modes: { sageInsight: 0, sageActive: false, sageForms: [], gateTraining: 0, openGates: 0 }, reputation: 0, notoriety: 0, honor: 0, factionTrust: { village: 0, underworld: 0 }, relationships: [{ id: 'sensei', name: mentor.name, bond: mentor.bond, memory: mentor.description }, { id: 'rival', name: rival.name, bond: -8, memory: 'competes for every small recognition' }, { id: 'teammate', name: 'Toma', bond: 8, memory: 'shares quiet notes after class' }], disciplines: [], dojutsuActive: false, dojutsuStrain: 0, dojutsuStage: 0, dojutsuInsight: 0, scars: [], knownJutsu: defaultJutsu.slice(0, 3), loadout: defaultJutsu.slice(0, 3), mastery: { 'binding-wire': 1, 'scouts-eye': 1, 'stone-guard': 1 } }, chronicle: [] };
+  const state: GameState = { saveVersion: 1, seed, stats, rngState, rival, world: { season: 1, borderTension: 2, councilTrust: 0, localIntel: 0, rumors: [village.rumor], secrets: [], storyFlags: [`home:${village.id}`], factions: defaultFactions(), careerCrisis: { defeatStreak: 0 } }, npcs: [{ id: 'toma', name: 'Toma Shiosaki', role: 'medic', bond: 10, status: 'available', goal: 'provar que suporte também decide batalhas', memory: 'deixou uma anotação de primeiros socorros no seu caderno', arcStage: 0 }, { id: 'mira', name: 'Mira Hoshino', role: 'scout', bond: 3, status: 'available', goal: `mapear rotas que ninguém patrulha em ${village.name}`, memory: 'observa antes de confiar', arcStage: 0 }, { id: 'rival', name: rival.name, role: 'rival', bond: -8, status: 'available', goal: 'superar cada expectativa da família', memory: 'transforma reconhecimento em competição', arcStage: 0 }], team: { memberIds: ['toma'], cohesion: 10 }, character: { name: name || 'Ren', village: village.name, rank: 'Academy', day: 1, attributes, trait, potential, origin, mentor, development: developmentPlan('Academy'), chakraPool: attributes.stamina * 10 + attributes.chakraControl * 2, health: 100, ryo: 30, inventory: { antidote: 0, 'sealing-slate': 0 }, research: { sealing: 0 }, modes: { sageInsight: 0, sageActive: false, sageForms: [], gateTraining: 0, openGates: 0 }, reputation: 0, notoriety: 0, honor: 0, factionTrust: { village: 0, underworld: 0 }, relationships: [{ id: 'sensei', name: mentor.name, bond: mentor.bond, memory: mentor.description }, { id: 'rival', name: rival.name, bond: -8, memory: 'competes for every small recognition' }, { id: 'teammate', name: 'Toma Shiosaki', bond: 8, memory: 'shares quiet notes after class' }], disciplines: [], dojutsuActive: false, dojutsuStrain: 0, dojutsuStage: 0, dojutsuInsight: 0, scars: [], knownJutsu: defaultJutsu.slice(0, 3), loadout: defaultJutsu.slice(0, 3), mastery: { 'binding-wire': 1, 'scouts-eye': 1, 'stone-guard': 1 } }, chronicle: [] };
   state.competitive = createCompetitiveState(state);
   state.academyIntroduction = { stage: 0, prompt: `Na Academia de ${village.name}, ${village.opening.toLowerCase()} No primeiro exercício, um sino de sinalização cai, um colega fica preso sob a estrutura e ${rival.name} percebe uma marca estranha no mecanismo. ${mentor.name} não dá ordem: espera para ver o que você considera importante.`, choices: ['shield', 'trace', 'challenge'] };
   return note(state, 'life', `${state.character.name} começa a Academia de ${state.character.village}. ${village.opening}`);
@@ -314,7 +314,7 @@ function createRoster(rngState: number, rank: CompetitiveRank, rival: Rival): [C
   };
   const roster: Competitor[] = canonicalRosters[rank].map(entry => ({ ...entry, rank, circuitWins: 0, circuitLosses: 0 }));
   const stage = rivalStage[rank];
-  roster.push({ id: `rival-${rank.toLowerCase()}`, portraitId: `rival-akio-kazehaya-${rank.toLowerCase()}`, name: rival.name, village: 'Kazan', age: stage.age, rank, yearsInRank: stage.yearsInRank, overall: stage.overall, profile: `Rival · ${rival.style}`, form: 'em ascensão', wins: 7 + stage.yearsInRank, losses: 1, points: 6, circuitWins: 0, circuitLosses: 0, rival: true });
+  roster.push({ id: `rival-${rank.toLowerCase()}`, portraitId: `rival-akio-kazanami-${rank.toLowerCase()}`, name: rival.name, village: 'Kazan', age: stage.age, rank, yearsInRank: stage.yearsInRank, overall: stage.overall, profile: `Rival · ${rival.style}`, form: 'em ascensão', wins: 7 + stage.yearsInRank, losses: 1, points: 6, circuitWins: 0, circuitLosses: 0, rival: true });
   return [roster.sort((a, b) => b.points - a.points || b.overall - a.overall || b.wins - a.wins), rngState];
 }
 function createCompetitiveState(state: GameState): CompetitiveState {
@@ -330,19 +330,24 @@ function circuitStanding(state: GameState, content: Content, rank: CompetitiveRa
 }
 function circuitPosition(state: GameState, content: Content, rank: CompetitiveRank): number { return circuitStanding(state, content, rank).findIndex(entry => entry.id === 'player') + 1; }
 export function ensureCompetitiveState(state: GameState): GameState {
-  const priorRivalName = state.rival.name;
   state.rival = { ...fixedRival, rank: state.rival.rank, reputation: state.rival.reputation, rivalry: state.rival.rivalry, stage: state.rival.stage, stance: state.rival.stance, lastEncounterDay: state.rival.lastEncounterDay, studiedStages: state.rival.studiedStages, memory: state.rival.memory };
-  if (priorRivalName !== state.rival.name) {
-    state.character.relationships = state.character.relationships.map(relationship => relationship.id === 'rival' ? { ...relationship, name: state.rival.name } : relationship);
-    state.npcs = state.npcs.map(npc => npc.role === 'rival' ? { ...npc, name: state.rival.name } : npc);
-  }
+  const canonicalMentor = mentors.find(mentor => mentor.id === state.character.mentor.id);
+  if (canonicalMentor) state.character.mentor = { ...state.character.mentor, name: canonicalMentor.name, description: canonicalMentor.description };
+  const companionNames: Record<string, string> = { toma: 'Toma Shiosaki', mira: 'Mira Hoshino' };
+  state.npcs = state.npcs.map(npc => ({ ...npc, name: npc.role === 'rival' ? state.rival.name : companionNames[npc.id] ?? npc.name }));
+  state.character.relationships = state.character.relationships.map(relationship => {
+    if (relationship.id === 'rival') return { ...relationship, name: state.rival.name };
+    if (relationship.id === 'sensei') return { ...relationship, name: state.character.mentor.name, memory: state.character.mentor.description };
+    if (relationship.id === 'teammate') return { ...relationship, name: companionNames.toma };
+    return relationship;
+  });
   if (!state.competitive) state.competitive = createCompetitiveState(state);
   state.competitive.playerPoints ??= 0; state.competitive.playerCircuitWins ??= 0; state.competitive.playerCircuitLosses ??= 0; state.competitive.scoredResults ??= 0;
   for (const rank of competitiveRanks) {
     const previous = state.competitive.rosters[rank] ?? [];
     const [canonical] = createRoster(state.rngState, rank, state.rival);
     state.competitive.rosters[rank] = canonical.map(entry => {
-      const saved = previous.find(current => current.id === entry.id);
+      const saved = previous.find(current => current.id === entry.id || (current.village === entry.village && current.profile === entry.profile));
       return saved ? { ...entry, overall: saved.overall ?? entry.overall, form: saved.form ?? entry.form, points: saved.points ?? entry.points, wins: saved.wins ?? entry.wins, losses: saved.losses ?? entry.losses, circuitWins: saved.circuitWins ?? 0, circuitLosses: saved.circuitLosses ?? 0 } : entry;
     });
   }
