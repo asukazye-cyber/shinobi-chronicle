@@ -12,7 +12,7 @@
     {"id":"genin-yori-hagane","portraitId":"genin-yori-hagane","name":"Yori Hagane","village":"Kurogane","age":14,"yearsInRank":2,"overall":49,"profile":"Versátil · fios e ferramentas","form":"estável","wins":3,"losses":3,"points":2},
     {"id":"genin-akari-tsukikage","portraitId":"genin-akari-tsukikage","name":"Akari Tsukikage","village":"Hoshigakure","age":13,"yearsInRank":1,"overall":48,"profile":"Suporte · primeiros socorros","form":"em ascensão","wins":2,"losses":3,"points":2},
     {"id":"genin-shin-kagari","portraitId":"genin-shin-kagari","name":"Shin Kagari","village":"Kazan","age":15,"yearsInRank":3,"overall":50,"profile":"Defesa · impacto e chão","form":"em queda","wins":2,"losses":4,"points":1},
-    {"id":"genin-fuyu-shiosaki","portraitId":"genin-fuyu-shiosaki","name":"Fuyu Shiosaki","village":"Mizuhara","age":12,"yearsInRank":1,"overall":47,"profile":"Controle · selos de água","form":"em ascensão","wins":2,"losses":3,"points":1},
+    {"id":"genin-fuyu-shiosaki","portraitId":"genin-fuyu-shiosaki","name":"Fuyu Shiosaki","village":"Mizuhara","age":13,"yearsInRank":1,"overall":47,"profile":"Controle · selos de água","form":"em ascensão","wins":2,"losses":3,"points":1},
     {"id":"genin-riku-arashi","portraitId":"genin-riku-arashi","name":"Riku Arashi","village":"Sunae","age":14,"yearsInRank":2,"overall":48,"profile":"Ofensivo · poeira e lâmina","form":"estável","wins":2,"losses":4,"points":1}
   ],
   "Chuunin": [
