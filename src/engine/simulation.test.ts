@@ -3,7 +3,7 @@ import raw from '../data/core.json';
 import { validateContent } from '../domain/validate';
 import { mergeContentPacks } from '../domain/mods';
 import { decodeSave, encodeSave } from './save';
-import { analyzeBuild, applyCommand, assessCharacter, createGame } from './simulation';
+import { analyzeBuild, applyCommand, assessCharacter, createGame, jutsuStudyCost } from './simulation';
 import { simulationEvents } from './events';
 
 const content = validateContent(raw);
@@ -371,6 +371,12 @@ describe('career simulation', () => {
     expect(s.character.knownJutsu).toContain('wind-cutter');
     expect(s.character.loadout[0]).toBe('wind-cutter');
     expect(s.character.mastery['wind-cutter']).toBe(0);
+  });
+  it('makes a wider or higher-rank library a real economic trade-off without a technique cap', () => {
+    const wind = content.jutsu.find(jutsu => jutsu.id === 'wind-cutter')!;
+    const advanced = content.jutsu.find(jutsu => jutsu.id === 'cinder-seal')!;
+    expect(jutsuStudyCost(wind, 10)).toBeGreaterThan(jutsuStudyCost(wind, 0));
+    expect(jutsuStudyCost(advanced, 0)).toBeGreaterThan(jutsuStudyCost(wind, 0));
   });
   it('enforces technique-tree prerequisites instead of treating advanced jutsu as a shop list', () => {
     let s = genin(820); s = { ...s, character: { ...s.character, rank: 'Chuunin', ryo: 200, knownJutsu: ['scouts-eye', 'stone-guard'], loadout: ['binding-wire', 'scouts-eye', 'stone-guard', 'mist-step'] } };
