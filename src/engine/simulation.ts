@@ -40,6 +40,35 @@ const homeVillages: VillageProfile[] = [
   { id: 'sunae', name: 'Sunae', academyFrame: 'pátios de lona e paredes baixas enfrentam o vento seco que redesenha as rotas todos os dias', opening: 'Uma rajada apaga as marcas de treino na areia.', rumor: 'Uma caravana de Sunae perdeu sua trilha após uma tempestade de poeira.', thread: { activity: 'listen', lead: 'Uma comerciante repete a mesma direção duas vezes, como se tivesse decorado uma rota que a areia já apagou. O mapa que ela carrega não pertence a nenhuma caravana registrada.', stages: { first: ['Mapa na Areia', 'Encontre uma caravana antes que marcadores falsos a levem para fora das dunas seguras.', 'O guia insiste em seguir o mapa; quem o desenhou talvez ainda esteja observando cada decisão.', 185, 'Fio de Sunae: rota e miragem'], second: ['Vento de Retorno', 'Descubra por que poços de passagem foram adulterados sem interromper a única rota de água de famílias nômades.', 'Expor os sabotadores seca o acordo atual; negociar preserva a água, mas deixa a ameaça viva.', 525, 'Conseqüência de Sunae: água e verdade'], final: ['O Deserto se Lembra', 'Interrompa uma crise de areia marcada que ameaça apagar vilas inteiras dos mapas políticos.', 'A tempestade não distingue culpados; o lado que controla os marcos quer que você escolha quem terá caminho de volta.', 985, 'Final de Sunae: território e retorno'] } } },
   { id: 'kurogane', name: 'Kurogane', academyFrame: 'pontes de metal, guindastes e vielas suspensas tornam altura e peso parte da aula', opening: 'Um cabo de carga vibra acima do pátio da Academia.', rumor: 'Operários de Kurogane ouvem passos em passarelas fechadas depois do toque de recolher.', thread: { activity: 'mentor', lead: 'Seu mentor reconhece a marca numa peça de metal trazida por um aluno: ela é de uma ponte desmontada depois de um acidente que ninguém mais comenta.', stages: { first: ['Cabo Rompido', 'Investigue uma passarela de carga que está falhando antes que o turno inteiro fique preso acima do vale.', 'A sabotagem parece recente, mas a ponte foi condenada por um relatório antigo que talvez estivesse certo.', 190, 'Fio de Kurogane: peso e responsabilidade'], second: ['Ponte de Peso', 'Proteja os trabalhadores que recusam atravessar uma estrutura essencial enquanto o conselho exige que a produção continue.', 'Parar a ponte afeta toda a vila; mantê-la aberta transforma medo justificado em dever obrigatório.', 535, 'Conseqüência de Kurogane: trabalho e decisão'], final: ['Cidade Suspensa', 'Impeça que uma rede de guindastes seja usada para isolar distritos inteiros de Kurogane durante uma crise política.', 'Cortar os cabos salva um lado e derruba o outro; coordenar a retirada exige confiar em gente que discorda de você.', 995, 'Final de Kurogane: o que sustenta a cidade'] } } }
 ];
+const legacyVillageNames: Record<string, string> = {
+  Hoshigakure: 'Konohagakure',
+  Kazan: 'Iwagakure',
+  Mizuhara: 'Kirigakure',
+  Sunae: 'Sunagakure',
+  Kurogane: 'Kumogakure'
+};
+const legacyVillageIds: Record<string, string> = {
+  hoshigakure: 'konohagakure',
+  kazan: 'iwagakure',
+  mizuhara: 'kirigakure',
+  sunae: 'sunagakure',
+  kurogane: 'kumogakure'
+};
+export const canonicalVillageName = (village: string) => legacyVillageNames[village] ?? village;
+const canonicalVillageId = (id: string) => legacyVillageIds[id] ?? id;
+function canonicalHomeVillage(profile: VillageProfile): VillageProfile {
+  const name = canonicalVillageName(profile.name), replace = (text: string) => text.replaceAll(profile.name, name);
+  const stage = (entry: VillageThread['stages']['first']) => entry.map(value => typeof value === 'string' ? replace(value) : value) as VillageThread['stages']['first'];
+  return {
+    ...profile,
+    id: canonicalVillageId(profile.id),
+    name,
+    academyFrame: replace(profile.academyFrame),
+    opening: replace(profile.opening),
+    rumor: replace(profile.rumor),
+    thread: { ...profile.thread, lead: replace(profile.thread.lead), stages: { first: stage(profile.thread.stages.first), second: stage(profile.thread.stages.second), final: stage(profile.thread.stages.final) } }
+  };
+}
 function defaultFactions() {
   return [
     { id: 'eclipse-covenant' as const, name: 'Pacto do Eclipse', agenda: 'reunir poderes raros antes que as vilas possam controlá-los', standing: 0, heat: 0 },
@@ -90,8 +119,10 @@ function resolveTournamentRound(state: GameState, choice: TournamentChoice, cont
   return note({ ...state, rngState: rng, tournament: next }, 'tournament', record);
 }
 function originProfile(rngState: number): [Origin, Mentor, number] { let originIndex: number, mentorIndex: number, rng: number; [originIndex, rng] = roll(rngState, origins.length); [mentorIndex, rng] = roll(rng, mentors.length); return [origins[originIndex], { ...mentors[mentorIndex], bond: 12, lessons: 0 }, rng]; }
-function homeVillage(rngState: number): [VillageProfile, number] { let index: number, rng: number; [index, rng] = roll(rngState, homeVillages.length); return [homeVillages[index], rng]; }
-function homeVillageFor(state: GameState): VillageProfile { return homeVillages.find(village => state.world.storyFlags.includes(`home:${village.id}`) || village.name === state.character.village) ?? homeVillages[0]; }
+function homeVillage(rngState: number): [VillageProfile, number] { let index: number, rng: number; [index, rng] = roll(rngState, homeVillages.length); return [canonicalHomeVillage(homeVillages[index]), rng]; }
+function homeVillageFor(state: GameState): VillageProfile {
+  return canonicalHomeVillage(homeVillages.find(village => state.world.storyFlags.includes(`home:${canonicalVillageId(village.id)}`) || canonicalVillageName(village.name) === state.character.village) ?? homeVillages[0]);
+}
 function openHomeThread(state: GameState, activity: VillageActivity): { state: GameState; text: string } {
   const home = homeVillageFor(state), leadFlag = `home:${home.id}:lead`;
   if (home.thread.activity !== activity || state.world.storyFlags.includes(leadFlag)) return { state, text: '' };
@@ -312,9 +343,9 @@ function createRoster(rngState: number, rank: CompetitiveRank, rival: Rival): [C
   const rivalStage: Record<CompetitiveRank, { age: number; yearsInRank: number; overall: number }> = {
     Genin: { age: 14, yearsInRank: 2, overall: 60 }, Chuunin: { age: 17, yearsInRank: 2, overall: 74 }, Jounin: { age: 20, yearsInRank: 2, overall: 88 }
   };
-  const roster: Competitor[] = canonicalRosters[rank].map(entry => ({ ...entry, rank, circuitWins: 0, circuitLosses: 0 }));
+  const roster: Competitor[] = canonicalRosters[rank].map(entry => ({ ...entry, village: canonicalVillageName(entry.village), rank, circuitWins: 0, circuitLosses: 0 }));
   const stage = rivalStage[rank];
-  roster.push({ id: `rival-${rank.toLowerCase()}`, portraitId: `rival-reiji-iwamine-${rank.toLowerCase()}`, name: rival.name, village: 'Kazan', age: stage.age, rank, yearsInRank: stage.yearsInRank, overall: stage.overall, profile: `Rival · ${rival.style}`, form: 'em ascensão', wins: 7 + stage.yearsInRank, losses: 1, points: 6, circuitWins: 0, circuitLosses: 0, rival: true });
+  roster.push({ id: `rival-${rank.toLowerCase()}`, portraitId: `rival-reiji-iwamine-${rank.toLowerCase()}`, name: rival.name, village: 'Iwagakure', age: stage.age, rank, yearsInRank: stage.yearsInRank, overall: stage.overall, profile: `Rival · ${rival.style}`, form: 'em ascensão', wins: 7 + stage.yearsInRank, losses: 1, points: 6, circuitWins: 0, circuitLosses: 0, rival: true });
   return [roster.sort((a, b) => b.points - a.points || b.overall - a.overall || b.wins - a.wins), rngState];
 }
 function createCompetitiveState(state: GameState): CompetitiveState {
@@ -330,6 +361,8 @@ function circuitStanding(state: GameState, content: Content, rank: CompetitiveRa
 }
 function circuitPosition(state: GameState, content: Content, rank: CompetitiveRank): number { return circuitStanding(state, content, rank).findIndex(entry => entry.id === 'player') + 1; }
 export function ensureCompetitiveState(state: GameState): GameState {
+  state.character.village = canonicalVillageName(state.character.village);
+  state.world.storyFlags = state.world.storyFlags.map(flag => flag.replace(/^home:(hoshigakure|kazan|mizuhara|sunae|kurogane)/, (_, id: string) => `home:${canonicalVillageId(id)}`));
   state.rival = { ...fixedRival, rank: state.rival.rank, reputation: state.rival.reputation, rivalry: state.rival.rivalry, stage: state.rival.stage, stance: state.rival.stance, lastEncounterDay: state.rival.lastEncounterDay, studiedStages: state.rival.studiedStages, memory: state.rival.memory };
   const canonicalMentor = mentors.find(mentor => mentor.id === state.character.mentor.id);
   if (canonicalMentor) state.character.mentor = { ...state.character.mentor, name: canonicalMentor.name, description: canonicalMentor.description };
@@ -344,7 +377,7 @@ export function ensureCompetitiveState(state: GameState): GameState {
   if (!state.competitive) state.competitive = createCompetitiveState(state);
   state.competitive.playerPoints ??= 0; state.competitive.playerCircuitWins ??= 0; state.competitive.playerCircuitLosses ??= 0; state.competitive.scoredResults ??= 0;
   for (const rank of competitiveRanks) {
-    const previous = state.competitive.rosters[rank] ?? [];
+    const previous = (state.competitive.rosters[rank] ?? []).map(entry => ({ ...entry, village: canonicalVillageName(entry.village) }));
     const [canonical] = createRoster(state.rngState, rank, state.rival);
     state.competitive.rosters[rank] = canonical.map(entry => {
       const saved = previous.find(current => current.id === entry.id || (current.village === entry.village && current.profile === entry.profile));

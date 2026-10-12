@@ -8,11 +8,11 @@ arquivos ausentes mantêm o fallback textual do jogo.
 
 | Arquivo | Função |
 | --- | --- |
-| `backgrounds/hoshigakure-square.webp` | Vila de Hoshigakure |
-| `backgrounds/kazan-forge.webp` | Vila de Kazan |
-| `backgrounds/mizuhara-canals.webp` | Vila de Mizuhara |
-| `backgrounds/sunae-dunes.webp` | Vila de Sunae |
-| `backgrounds/kurogane-bridges.webp` | Vila de Kurogane |
+| `backgrounds/konohagakure-square.webp` | Vila de Konohagakure |
+| `backgrounds/iwagakure-forge.webp` | Vila de Iwagakure |
+| `backgrounds/kirigakure-canals.webp` | Vila de Kirigakure |
+| `backgrounds/sunagakure-dunes.webp` | Vila de Sunagakure |
+| `backgrounds/kumogakure-bridges.webp` | Vila de Kumogakure |
 | `backgrounds/training-ground.webp` | Campo de treino |
 | `backgrounds/vale-das-pontes.webp` | Circuito Regional |
 | `backgrounds/cupula-das-cinco-rotas.webp` | Final Jounin |

@@ -6,11 +6,11 @@ const scene = (id: string, label: string, purpose: string): VisualSlot => ({ id:
 
 /** A file in public/assets/<file> owns this slot. Missing art keeps a readable fallback. */
 export const visualSlots: VisualSlot[] = [
-  background('hoshigakure-square', 'Hoshigakure', 'Cabeçalho e retorno à vila.', true),
-  background('kazan-forge', 'Kazan', 'Cabeçalho e retorno à vila.'),
-  background('mizuhara-canals', 'Mizuhara', 'Cabeçalho e retorno à vila.'),
-  background('sunae-dunes', 'Sunae', 'Cabeçalho e retorno à vila.'),
-  background('kurogane-bridges', 'Kurogane', 'Cabeçalho e retorno à vila.'),
+  background('konohagakure-square', 'Konohagakure', 'Cabeçalho e retorno à vila.', true),
+  background('iwagakure-forge', 'Iwagakure', 'Cabeçalho e retorno à vila.'),
+  background('kirigakure-canals', 'Kirigakure', 'Cabeçalho e retorno à vila.'),
+  background('sunagakure-dunes', 'Sunagakure', 'Cabeçalho e retorno à vila.'),
+  background('kumogakure-bridges', 'Kumogakure', 'Cabeçalho e retorno à vila.'),
   background('training-ground', 'Campo de treino', 'Treino e prática entre operações.'),
   background('vale-das-pontes', 'Vale das Pontes', 'Circuito regional e exame Chuunin.'),
   background('cupula-das-cinco-rotas', 'Cúpula das Cinco Rotas', 'Final internacional Jounin.'),
@@ -32,9 +32,9 @@ export const visualSlots: VisualSlot[] = [
 
 const slotsById = new Map(visualSlots.map(slot => [slot.id, slot]));
 const villageSlots: Record<string, string> = {
-  Hoshigakure: 'background:hoshigakure-square', Kazan: 'background:kazan-forge', Mizuhara: 'background:mizuhara-canals', Sunae: 'background:sunae-dunes', Kurogane: 'background:kurogane-bridges'
+  Konohagakure: 'background:konohagakure-square', Iwagakure: 'background:iwagakure-forge', Kirigakure: 'background:kirigakure-canals', Sunagakure: 'background:sunagakure-dunes', Kumogakure: 'background:kumogakure-bridges'
 };
 
 export const publicAssetUrl = (file: string) => `/assets/${file}`;
 export const getVisualSlot = (id: string) => slotsById.get(id);
-export const villageBackgroundSlot = (village: string) => getVisualSlot(villageSlots[village] ?? 'background:hoshigakure-square')!;
+export const villageBackgroundSlot = (village: string) => getVisualSlot(villageSlots[village] ?? 'background:konohagakure-square')!;

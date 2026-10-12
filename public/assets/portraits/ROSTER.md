@@ -19,9 +19,9 @@ idade e patente, não três pessoas diferentes.
 
 Os originais usam famílias próprias que sugerem a cultura e o estilo da vila,
 sem reutilizar clãs canônicos: **Hoshino, Amatsuki e Tsukikage** em
-Hoshigakure; **Iwamine, Homura e Kagari** em Kazan; **Kirisame, Minase e
-Shiosaki** em Mizuhara; **Sabaku, Kazehara e Arashi** em Sunae; e
-**Tetsumori, Hagane e Kurogane** na vila de mesmo nome. É uma convenção de
+Konohagakure; **Iwamine, Homura e Kagari** em Iwagakure; **Kirisame, Minase e
+Shiosaki** em Kirigakure; **Sabaku, Kazehara e Arashi** em Sunagakure; e
+**Tetsumori, Hagane e Kurogane** em Kumogakure. É uma convenção de
 mundo, não uma vantagem mecânica: perfil, OVR, idade e estilo continuam sendo
 definidos individualmente.
 

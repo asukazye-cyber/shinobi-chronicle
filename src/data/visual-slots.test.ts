@@ -10,7 +10,7 @@ describe('visual asset slots', () => {
   });
 
   it('resolves a usable village backdrop without coupling it to the save', () => {
-    expect(villageBackgroundSlot('Mizuhara').file).toBe('backgrounds/mizuhara-canals.webp');
-    expect(villageBackgroundSlot('Unknown').file).toBe('backgrounds/hoshigakure-square.webp');
+    expect(villageBackgroundSlot('Kirigakure').file).toBe('backgrounds/kirigakure-canals.webp');
+    expect(villageBackgroundSlot('Unknown').file).toBe('backgrounds/konohagakure-square.webp');
   });
 });

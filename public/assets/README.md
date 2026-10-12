@@ -39,9 +39,9 @@ Use letras minúsculas, hífens e nomes estáveis:
 ```text
 portraits/naruto-uzumaki.webp
 portraits/genin-184729-3.webp
-backgrounds/hoshigakure-academy.webp
+backgrounds/konohagakure-academy.webp
 backgrounds/vale-das-pontes.webp
-scenes/ataque-a-hoshigakure.webp
+scenes/ataque-a-konohagakure.webp
 icons/titulo-guardiao-regional.webp
 ```
 
