@@ -16,6 +16,7 @@ arquivos ausentes mantêm o fallback textual do jogo.
 | `backgrounds/arena-konohagakure-forest.webp` | Arena do Bosque de Konohagakure — etapas e final regional Genin |
 | `backgrounds/arena-iwagakure-terraces.webp` | Terraço de Pedra de Iwagakure — etapa internacional vertical |
 | `backgrounds/arena-kirigakure-canals.webp` | Arena dos Canais de Kirigakure — etapa internacional de névoa e água |
+| `backgrounds/arena-sunagakure-dunes.webp` | Praça das Dunas de Sunagakure — etapa internacional de areia e calor |
 | `backgrounds/training-ground.webp` | Campo de treino |
 | `backgrounds/vale-das-pontes.webp` | Circuito Regional |
 | `backgrounds/cupula-das-cinco-rotas.webp` | Final Jounin |
