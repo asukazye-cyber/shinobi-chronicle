@@ -27,7 +27,8 @@ const tagLabel: Record<string, string> = { offense: 'ofensiva', defense: 'defesa
 const objectiveLabel: Record<string, string> = { capture: 'capturar o alvo', extract: 'extrair com segurança', hold: 'sustentar a posição', escape: 'abrir uma rota de saída', seal: 'conter e selar a ameaça' };
 const arenaArtwork: Record<string, string> = {
   'Arena do Bosque de Konohagakure': publicAssetUrl('backgrounds/arena-konohagakure-forest.webp'),
-  'Terraço de Pedra de Iwagakure': publicAssetUrl('backgrounds/arena-iwagakure-terraces.webp')
+  'Terraço de Pedra de Iwagakure': publicAssetUrl('backgrounds/arena-iwagakure-terraces.webp'),
+  'Arena dos Canais de Kirigakure': publicAssetUrl('backgrounds/arena-kirigakure-canals.webp')
 };
 function Portrait({ portraitId, name, large = false }: { portraitId: string; name: string; large?: boolean }) {
   const initials = name.split(/\s+/).slice(0, 2).map(part => part[0]).join('').toUpperCase();

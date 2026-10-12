@@ -3,8 +3,8 @@ import { visualSlots, villageBackgroundSlot } from './visual-slots';
 
 describe('visual asset slots', () => {
   it('keeps static slots unique and in their declared asset directories', () => {
-    expect(new Set(visualSlots.map(slot => slot.id)).size).toBe(24);
-    expect(visualSlots.filter(slot => slot.kind === 'background')).toHaveLength(14);
+    expect(new Set(visualSlots.map(slot => slot.id)).size).toBe(25);
+    expect(visualSlots.filter(slot => slot.kind === 'background')).toHaveLength(15);
     expect(visualSlots.filter(slot => slot.kind === 'scene')).toHaveLength(10);
     expect(visualSlots.every(slot => slot.file.startsWith(`${slot.kind}s/`) && slot.file.endsWith('.webp'))).toBe(true);
   });
