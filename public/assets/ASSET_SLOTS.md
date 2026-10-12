@@ -17,6 +17,7 @@ arquivos ausentes mantêm o fallback textual do jogo.
 | `backgrounds/arena-iwagakure-terraces.webp` | Terraço de Pedra de Iwagakure — etapa internacional vertical |
 | `backgrounds/arena-kirigakure-canals.webp` | Arena dos Canais de Kirigakure — etapa internacional de névoa e água |
 | `backgrounds/arena-sunagakure-dunes.webp` | Praça das Dunas de Sunagakure — etapa internacional de areia e calor |
+| `backgrounds/arena-kumogakure-clouds.webp` | Terraço das Nuvens de Kumogakure — etapa internacional de penhascos e tempestade |
 | `backgrounds/training-ground.webp` | Campo de treino |
 | `backgrounds/vale-das-pontes.webp` | Circuito Regional |
 | `backgrounds/cupula-das-cinco-rotas.webp` | Final Jounin |

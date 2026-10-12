@@ -15,6 +15,7 @@ export const visualSlots: VisualSlot[] = [
   background('arena-iwagakure-terraces', 'Terraço de Pedra de Iwagakure', 'Etapa internacional com terreno vertical.', true),
   background('arena-kirigakure-canals', 'Arena dos Canais de Kirigakure', 'Etapa internacional de névoa, água e visibilidade limitada.', true),
   background('arena-sunagakure-dunes', 'Praça das Dunas de Sunagakure', 'Etapa internacional de areia móvel, calor e terreno instável.', true),
+  background('arena-kumogakure-clouds', 'Terraço das Nuvens de Kumogakure', 'Etapa internacional suspensa entre pontes, penhascos e tempestades.', true),
   background('training-ground', 'Campo de treino', 'Treino e prática entre operações.'),
   background('vale-das-pontes', 'Vale das Pontes', 'Circuito regional e exame Chuunin.'),
   background('cupula-das-cinco-rotas', 'Cúpula das Cinco Rotas', 'Final internacional Jounin.'),

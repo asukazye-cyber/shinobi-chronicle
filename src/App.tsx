@@ -29,7 +29,8 @@ const arenaArtwork: Record<string, string> = {
   'Arena do Bosque de Konohagakure': publicAssetUrl('backgrounds/arena-konohagakure-forest.webp'),
   'Terraço de Pedra de Iwagakure': publicAssetUrl('backgrounds/arena-iwagakure-terraces.webp'),
   'Arena dos Canais de Kirigakure': publicAssetUrl('backgrounds/arena-kirigakure-canals.webp'),
-  'Praça das Dunas de Sunagakure': publicAssetUrl('backgrounds/arena-sunagakure-dunes.webp')
+  'Praça das Dunas de Sunagakure': publicAssetUrl('backgrounds/arena-sunagakure-dunes.webp'),
+  'Terraço das Nuvens de Kumogakure': publicAssetUrl('backgrounds/arena-kumogakure-clouds.webp')
 };
 function Portrait({ portraitId, name, large = false }: { portraitId: string; name: string; large?: boolean }) {
   const initials = name.split(/\s+/).slice(0, 2).map(part => part[0]).join('').toUpperCase();
