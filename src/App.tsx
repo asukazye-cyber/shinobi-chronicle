@@ -25,6 +25,10 @@ const careerName = { anbu: 'ANBU', sensei: 'Sensei', commander: 'Comando de Camp
 const potentialText = (profile?: string, breakthrough?: boolean) => profile === 'prodigy' ? 'Prodígio — uma aptidão marcante, um ponto cego e atenção precoce.' : profile === 'late-bloomer' && breakthrough ? 'Potencial desperto — o campo revelou a força que o início escondia.' : profile === 'late-bloomer' ? 'Começo difícil — menos afinidade inicial; três sucessos podem despertar seu potencial.' : 'Aptidão comum — sem extremos; sua direção será construída em campo.';
 const tagLabel: Record<string, string> = { offense: 'ofensiva', defense: 'defesa', control: 'controle', mobility: 'mobilidade', perception: 'percepção', support: 'suporte', stealth: 'furtividade' };
 const objectiveLabel: Record<string, string> = { capture: 'capturar o alvo', extract: 'extrair com segurança', hold: 'sustentar a posição', escape: 'abrir uma rota de saída', seal: 'conter e selar a ameaça' };
+const arenaArtwork: Record<string, string> = {
+  'Arena do Bosque de Konohagakure': publicAssetUrl('backgrounds/arena-konohagakure-forest.webp'),
+  'Terraço de Pedra de Iwagakure': publicAssetUrl('backgrounds/arena-iwagakure-terraces.webp')
+};
 function Portrait({ portraitId, name, large = false }: { portraitId: string; name: string; large?: boolean }) {
   const initials = name.split(/\s+/).slice(0, 2).map(part => part[0]).join('').toUpperCase();
   return <span className={`portrait ${large ? 'large' : ''}`} aria-label={`Retrato de ${name}`} title={`Arte: ${portraitId}.webp`}><i>{initials}</i><img src={`/assets/portraits/${portraitId}.webp`} alt="" onError={event => event.currentTarget.remove()} /></span>;
@@ -44,7 +48,7 @@ function CircuitStage({ state, rank, run }: { state: GameState; rank: 'Genin' | 
   if (!stop) return <p className="hint">As cinco etapas {rank === 'Genin' ? 'regionais' : 'internacionais'} foram concluídas. A tabela define os oito nomes da fase final.</p>;
   const opponent = roster.find(entry => entry.id === stop.opponentId);
   const regional = rank === 'Genin';
-  const artwork = stop.arena === 'Arena do Bosque de Konohagakure' ? publicAssetUrl('backgrounds/arena-konohagakure-forest.webp') : undefined;
+  const artwork = arenaArtwork[stop.arena];
   return <article className="dilemma circuit-stage" style={artwork ? { backgroundImage: `linear-gradient(90deg, rgba(15, 22, 29, .94), rgba(15, 22, 29, .74)), url(${artwork})`, backgroundSize: 'cover', backgroundPosition: 'center' } : undefined}><p className="eyebrow">{regional ? `CIRCUITO REGIONAL · ETAPA ${stop.index + 1}/5` : `CIRCUITO INTERNACIONAL · ETAPA ${stop.index + 1}/5`}</p><h3>{stop.arena}</h3><p>{regional ? `A temporada Genin inteira acontece em ${stop.host}.` : `Parada oficial em ${stop.host}.`} Campo: {stop.terrain}.</p><p><b>Confronto:</b> {opponent?.name ?? 'adversário confirmado'} · OVR {opponent?.overall ?? '—'} · {opponent?.profile ?? 'perfil reservado'}</p><p className="hint">A arena cria uma oportunidade tática; ela não entrega vitória. Escolha uma resposta rápida e a tabela inteira avança junto.</p><button onClick={() => run({ type: 'RESOLVE_CIRCUIT_STOP', choice: 'read' })}>Ler o campo</button><button onClick={() => run({ type: 'RESOLVE_CIRCUIT_STOP', choice: 'control' })}>Controlar o ritmo</button><button onClick={() => run({ type: 'RESOLVE_CIRCUIT_STOP', choice: 'commit' })}>Assumir o confronto</button><small>Etapas concluídas: {stops.filter(entry => entry.completed).length}/5</small></article>;
 }
 function NextStep({ state, slots }: { state: GameState; slots: number }) {
