@@ -7,7 +7,7 @@ const scene = (id: string, label: string, purpose: string): VisualSlot => ({ id:
 /** A file in public/assets/<file> owns this slot. Missing art keeps a readable fallback. */
 export const visualSlots: VisualSlot[] = [
   background('konohagakure-square', 'Konohagakure', 'Cabeçalho e retorno à vila.', true),
-  background('iwagakure-forge', 'Iwagakure', 'Cabeçalho e retorno à vila.'),
+  background('iwagakure-forge', 'Iwagakure', 'Cabeçalho e retorno à vila.', true),
   background('kirigakure-canals', 'Kirigakure', 'Cabeçalho e retorno à vila.'),
   background('sunagakure-dunes', 'Sunagakure', 'Cabeçalho e retorno à vila.'),
   background('kumogakure-bridges', 'Kumogakure', 'Cabeçalho e retorno à vila.'),
