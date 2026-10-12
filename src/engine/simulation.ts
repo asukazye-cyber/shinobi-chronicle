@@ -350,7 +350,8 @@ const canonicalRosters = canonicalCompetitors as unknown as Record<CompetitiveRa
 // current save's accumulated form and scheduled opponent when it upgrades.
 const competitorIdAliases: Record<string, string> = {
   'chuunin-reika-hoshino': 'chuunin-reika-moriyama', 'chuunin-goro-iwamine': 'chuunin-goro-danzan', 'chuunin-ayame-kirisame': 'chuunin-ayame-shiranami', 'chuunin-touma-sabaku': 'chuunin-touma-ryuuseki', 'chuunin-sae-tetsumori': 'chuunin-sae-raikawa', 'chuunin-kento-amatsuki': 'chuunin-kento-hanabusa', 'chuunin-iori-homura': 'chuunin-iori-sekizan',
-  'chuunin-ume-minase': 'chuunin-ume-umisato', 'chuunin-seiji-arashi': 'chuunin-seiji-sunagiri', 'chuunin-ran-hagane': 'chuunin-ran-takamine', 'chuunin-chika-tsukikage': 'chuunin-chika-aobane', 'chuunin-gen-kagari': 'chuunin-gen-ganryu', 'chuunin-maki-shiosaki': 'chuunin-maki-mizuho', 'chuunin-kyo-kazehara': 'chuunin-kyo-saganami'
+  'chuunin-ume-minase': 'chuunin-ume-umisato', 'chuunin-seiji-arashi': 'chuunin-seiji-sunagiri', 'chuunin-ran-hagane': 'chuunin-ran-takamine', 'chuunin-chika-tsukikage': 'chuunin-chika-aobane', 'chuunin-gen-kagari': 'chuunin-gen-ganryu', 'chuunin-maki-shiosaki': 'chuunin-maki-mizuho', 'chuunin-kyo-kazehara': 'chuunin-kyo-saganami',
+  'jounin-masato-hoshino': 'jounin-masato-morikawa', 'jounin-rin-iwamine': 'jounin-rin-ganseki', 'jounin-nami-kirisame': 'jounin-nami-aoshio', 'jounin-taiga-sabaku': 'jounin-taiga-sunaishi', 'jounin-emiko-kurogane': 'jounin-emiko-kuromine', 'jounin-kai-amatsuki': 'jounin-kai-momiji', 'jounin-yuika-homura': 'jounin-yuika-dougan', 'jounin-shun-minase': 'jounin-shun-nagisawa', 'jounin-kasumi-kazehara': 'jounin-kasumi-sarashi', 'jounin-daizen-hagane': 'jounin-daizen-raikou', 'legend-sakura-haruno': 'legend-neji-hyuga'
 };
 function createRoster(rngState: number, rank: CompetitiveRank, rival: Rival): [Competitor[], number] {
   const rivalStage: Record<CompetitiveRank, { age: number; yearsInRank: number; overall: number }> = {

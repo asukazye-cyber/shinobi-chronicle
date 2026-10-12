@@ -18,10 +18,11 @@ idade e patente, não três pessoas diferentes.
 ## Convenção de nomes
 
 Cada divisão competitiva usa famílias originais próprias, com nomes que evocam
-a cultura e o estilo da vila sem reutilizar clãs canônicos. O bloco Chuunin,
-em particular, não repete sobrenomes dos Genin ou Jounin: são rivais de outra
-geração, não versões recicladas do mesmo elenco. Isso é identidade narrativa,
-não vantagem mecânica: perfil, OVR, idade e estilo continuam definidos
+a cultura e o estilo da vila sem reutilizar clãs canônicos. Genin, Chuunin e
+Jounin não repetem sobrenomes entre si: são circuitos de gerações diferentes,
+não versões recicladas do mesmo elenco. Reiji Iwamine é a única continuidade
+intencional, por ser o rival recorrente. Isso é identidade narrativa, não
+vantagem mecânica: perfil, OVR, idade e estilo continuam definidos
 individualmente.
 
 ## Circuito Genin
@@ -51,13 +52,13 @@ chuunin-maki-mizuho.webp       chuunin-kyo-saganami.webp
 ## Circuito Jounin
 
 ```text
-jounin-masato-hoshino.webp     jounin-rin-iwamine.webp
-jounin-nami-kirisame.webp      jounin-taiga-sabaku.webp
-jounin-emiko-kurogane.webp     jounin-kai-amatsuki.webp
-jounin-yuika-homura.webp       jounin-shun-minase.webp
-jounin-kasumi-kazehara.webp    jounin-daizen-hagane.webp
+jounin-masato-morikawa.webp    jounin-rin-ganseki.webp
+jounin-nami-aoshio.webp        jounin-taiga-sunaishi.webp
+jounin-emiko-kuromine.webp     jounin-kai-momiji.webp
+jounin-yuika-dougan.webp       jounin-shun-nagisawa.webp
+jounin-kasumi-sarashi.webp     jounin-daizen-raikou.webp
 naruto-uzumaki.webp          sasuke-uchiha.webp
-sakura-haruno.webp           shikamaru-nara.webp
+neji-hyuga.webp              shikamaru-nara.webp
 ```
 
 São **46 arquivos** no pacote visual completo: 42 participantes de circuito,

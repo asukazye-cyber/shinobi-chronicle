@@ -204,9 +204,9 @@ describe('career simulation', () => {
     expect(s.competitive?.rosters.Genin.some(entry => entry.portraitId === 'genin-hina-amatsuki')).toBe(true);
     expect(s.competitive?.rosters.Genin.every(entry => entry.portraitId.includes('genin') || entry.portraitId.includes('rival'))).toBe(true);
     const surname = (name: string) => name.split(' ').at(-1)!;
-    const chuuninFamilies = new Set(s.competitive!.rosters.Chuunin.filter(entry => !entry.rival).map(entry => surname(entry.name)));
-    const otherFamilies = new Set([...s.competitive!.rosters.Genin, ...s.competitive!.rosters.Jounin].filter(entry => !entry.rival && !entry.legend).map(entry => surname(entry.name)));
-    expect([...chuuninFamilies].every(family => !otherFamilies.has(family))).toBe(true);
+    const originalCircuitFamilies = [...s.competitive!.rosters.Genin, ...s.competitive!.rosters.Chuunin, ...s.competitive!.rosters.Jounin].filter(entry => !entry.rival && !entry.legend).map(entry => surname(entry.name));
+    expect(new Set(originalCircuitFamilies).size).toBe(originalCircuitFamilies.length);
+    expect(s.competitive!.rosters.Jounin.some(entry => entry.id === 'legend-neji-hyuga' && entry.portraitId === 'neji-hyuga')).toBe(true);
     expect(s.competitive?.rosters.Jounin.filter(entry => entry.legend).every(entry => !entry.portraitId.includes(String(s.seed)))).toBe(true);
     expect(s.competitive?.rosters.Genin.every(entry => entry.age >= 10 && entry.age <= 15)).toBe(true);
     expect(assessment.overall).toBeGreaterThan(1);
