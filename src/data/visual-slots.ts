@@ -10,7 +10,7 @@ export const visualSlots: VisualSlot[] = [
   background('iwagakure-forge', 'Iwagakure', 'Cabeçalho e retorno à vila.', true),
   background('kirigakure-canals', 'Kirigakure', 'Cabeçalho e retorno à vila.', true),
   background('sunagakure-dunes', 'Sunagakure', 'Cabeçalho e retorno à vila.', true),
-  background('kumogakure-bridges', 'Kumogakure', 'Cabeçalho e retorno à vila.'),
+  background('kumogakure-bridges', 'Kumogakure', 'Cabeçalho e retorno à vila.', true),
   background('training-ground', 'Campo de treino', 'Treino e prática entre operações.'),
   background('vale-das-pontes', 'Vale das Pontes', 'Circuito regional e exame Chuunin.'),
   background('cupula-das-cinco-rotas', 'Cúpula das Cinco Rotas', 'Final internacional Jounin.'),
