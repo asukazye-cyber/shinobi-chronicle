@@ -17,13 +17,12 @@ idade e patente, não três pessoas diferentes.
 
 ## Convenção de nomes
 
-Os originais usam famílias próprias que sugerem a cultura e o estilo da vila,
-sem reutilizar clãs canônicos: **Hoshino, Amatsuki e Tsukikage** em
-Konohagakure; **Iwamine, Homura e Kagari** em Iwagakure; **Kirisame, Minase e
-Shiosaki** em Kirigakure; **Sabaku, Kazehara e Arashi** em Sunagakure; e
-**Tetsumori, Hagane e Kurogane** em Kumogakure. É uma convenção de
-mundo, não uma vantagem mecânica: perfil, OVR, idade e estilo continuam sendo
-definidos individualmente.
+Cada divisão competitiva usa famílias originais próprias, com nomes que evocam
+a cultura e o estilo da vila sem reutilizar clãs canônicos. O bloco Chuunin,
+em particular, não repete sobrenomes dos Genin ou Jounin: são rivais de outra
+geração, não versões recicladas do mesmo elenco. Isso é identidade narrativa,
+não vantagem mecânica: perfil, OVR, idade e estilo continuam definidos
+individualmente.
 
 ## Circuito Genin
 
@@ -40,13 +39,13 @@ genin-fuyu-shiosaki.webp      genin-riku-arashi.webp
 ## Circuito Chuunin
 
 ```text
-chuunin-reika-hoshino.webp     chuunin-goro-iwamine.webp
-chuunin-ayame-kirisame.webp    chuunin-touma-sabaku.webp
-chuunin-sae-tetsumori.webp     chuunin-kento-amatsuki.webp
-chuunin-iori-homura.webp       chuunin-ume-minase.webp
-chuunin-seiji-arashi.webp      chuunin-ran-hagane.webp
-chuunin-chika-tsukikage.webp   chuunin-gen-kagari.webp
-chuunin-maki-shiosaki.webp     chuunin-kyo-kazehara.webp
+chuunin-reika-moriyama.webp    chuunin-goro-danzan.webp
+chuunin-ayame-shiranami.webp   chuunin-touma-ryuuseki.webp
+chuunin-sae-raikawa.webp       chuunin-kento-hanabusa.webp
+chuunin-iori-sekizan.webp      chuunin-ume-umisato.webp
+chuunin-seiji-sunagiri.webp    chuunin-ran-takamine.webp
+chuunin-chika-aobane.webp      chuunin-gen-ganryu.webp
+chuunin-maki-mizuho.webp       chuunin-kyo-saganami.webp
 ```
 
 ## Circuito Jounin

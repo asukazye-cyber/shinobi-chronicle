@@ -346,6 +346,12 @@ function annualBaseline(state: GameState, content?: Content): AnnualBaseline {
 }
 type CanonicalCompetitor = Omit<Competitor, 'rank' | 'circuitWins' | 'circuitLosses' | 'rival'>;
 const canonicalRosters = canonicalCompetitors as unknown as Record<CompetitiveRank, CanonicalCompetitor[]>;
+// Chuunin names were individualized after the first roster pass. Preserve a
+// current save's accumulated form and scheduled opponent when it upgrades.
+const competitorIdAliases: Record<string, string> = {
+  'chuunin-reika-hoshino': 'chuunin-reika-moriyama', 'chuunin-goro-iwamine': 'chuunin-goro-danzan', 'chuunin-ayame-kirisame': 'chuunin-ayame-shiranami', 'chuunin-touma-sabaku': 'chuunin-touma-ryuuseki', 'chuunin-sae-tetsumori': 'chuunin-sae-raikawa', 'chuunin-kento-amatsuki': 'chuunin-kento-hanabusa', 'chuunin-iori-homura': 'chuunin-iori-sekizan',
+  'chuunin-ume-minase': 'chuunin-ume-umisato', 'chuunin-seiji-arashi': 'chuunin-seiji-sunagiri', 'chuunin-ran-hagane': 'chuunin-ran-takamine', 'chuunin-chika-tsukikage': 'chuunin-chika-aobane', 'chuunin-gen-kagari': 'chuunin-gen-ganryu', 'chuunin-maki-shiosaki': 'chuunin-maki-mizuho', 'chuunin-kyo-kazehara': 'chuunin-kyo-saganami'
+};
 function createRoster(rngState: number, rank: CompetitiveRank, rival: Rival): [Competitor[], number] {
   const rivalStage: Record<CompetitiveRank, { age: number; yearsInRank: number; overall: number }> = {
     Genin: { age: 14, yearsInRank: 2, overall: 60 }, Chuunin: { age: 17, yearsInRank: 2, overall: 74 }, Jounin: { age: 20, yearsInRank: 2, overall: 88 }
@@ -402,7 +408,7 @@ export function ensureCompetitiveState(state: GameState): GameState {
   if (!state.competitive) state.competitive = createCompetitiveState(state);
   state.competitive.playerPoints ??= 0; state.competitive.playerCircuitWins ??= 0; state.competitive.playerCircuitLosses ??= 0; state.competitive.scoredResults ??= 0;
   for (const rank of competitiveRanks) {
-    const previous = (state.competitive.rosters[rank] ?? []).map(entry => ({ ...entry, village: canonicalVillageName(entry.village) }));
+    const previous = (state.competitive.rosters[rank] ?? []).map(entry => ({ ...entry, id: competitorIdAliases[entry.id] ?? entry.id, village: canonicalVillageName(entry.village) }));
     const [canonical] = createRoster(state.rngState, rank, state.rival);
     state.competitive.rosters[rank] = canonical.map(entry => {
       const saved = previous.find(current => current.id === entry.id || (current.village === entry.village && current.profile === entry.profile));
@@ -420,6 +426,7 @@ export function ensureCompetitiveState(state: GameState): GameState {
     state = note(state, 'tournament', 'O calendário competitivo foi renovado: missões voltam a valer por suas consequências, e somente as cinco etapas oficiais pontuam na tabela.');
   }
   const competitive = state.competitive!;
+  if (competitive.stops) for (const rank of competitiveRanks) competitive.stops[rank] = (competitive.stops[rank] ?? []).map(stop => ({ ...stop, opponentId: competitorIdAliases[stop.opponentId] ?? stop.opponentId }));
   competitive.stops ??= Object.fromEntries(competitiveRanks.map(rank => [rank, stopsFor(state, rank, competitive.rosters[rank])])) as Record<CompetitiveRank, CircuitStop[]>;
   return state;
 }
