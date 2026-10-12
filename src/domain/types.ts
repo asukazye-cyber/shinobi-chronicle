@@ -34,7 +34,7 @@ export type DevelopmentPlan = { phase: Rank; focus: Attribute[]; sessions: numbe
 export type CareerPath = 'anbu' | 'sensei' | 'commander' | 'rogue';
 export type ChuuninExamChoice = 'rescue' | 'secure' | 'analyze';
 export type ChuuninExam = { choices: ChuuninExamChoice[]; prompt: string };
-export type TournamentKind = 'chuunin' | 'jounin';
+export type TournamentKind = 'chuunin' | 'jounin' | 'grand';
 export type TournamentChoice = 'read' | 'control' | 'commit';
 /** The player route through an eight-shinobi annual final. */
 export type Tournament = { kind: TournamentKind; host: string; entrants: string[]; qualifiers: string[]; playerSeed: number; round: 0 | 1 | 2; wins: number; prompt: string; history: string[] };
@@ -44,7 +44,9 @@ export type CompetitorForm = 'em ascensão' | 'estável' | 'em queda' | 'lesiona
 export type Competitor = { id: string; portraitId: string; name: string; village: string; age: number; rank: CompetitiveRank; yearsInRank: number; overall: number; profile: string; form: CompetitorForm; wins: number; losses: number; points: number; circuitWins: number; circuitLosses: number; rival?: boolean; legend?: boolean };
 export type AnnualBaseline = { year: number; overall: number; attributes: Record<Attribute, number>; mastery: number; missions: number; successes: number };
 export type AnnualReport = { year: number; overall: number; delta: number; trajectory: 'evolução' | 'regressão' | 'estável'; changedAttributes: string[]; masteryGained: number; missionRecord: string; circuitPosition: number; headline: string };
-export type CompetitiveState = { rosters: Record<CompetitiveRank, Competitor[]>; baseline: AnnualBaseline; annualReports: AnnualReport[]; playerPoints: number; playerCircuitWins: number; playerCircuitLosses: number; scoredResults: number; lastFinale?: { rank: CompetitiveRank; year: number; champion: string; playerPosition: number; promoted: boolean } };
+/** One fast scored bout. Genin stays at the player's home arena; later ranks tour every village. */
+export type CircuitStop = { index: number; host: string; arena: string; terrain: string; opponentId: string; completed?: boolean; result?: 'victory' | 'defeat' };
+export type CompetitiveState = { rosters: Record<CompetitiveRank, Competitor[]>; baseline: AnnualBaseline; annualReports: AnnualReport[]; playerPoints: number; playerCircuitWins: number; playerCircuitLosses: number; scoredResults: number; /** Replaces legacy mission-scored standings with scheduled tournament bouts. */ formatVersion?: 2; stops?: Record<CompetitiveRank, CircuitStop[]>; lastFinale?: { rank: CompetitiveRank; year: number; champion: string; playerPosition: number; promoted: boolean } };
 export type GeninFieldMark = 'guardian' | 'scout' | 'mediator';
 export type RegionalCircuitChoice = 'shield' | 'trace' | 'parley';
 export type RegionalCircuit = { prompt: string; host: string; choices: RegionalCircuitChoice[] };
@@ -87,6 +89,8 @@ export type Command =
   | { type: 'RESOLVE_REGIONAL_CIRCUIT'; choice: RegionalCircuitChoice }
   | { type: 'RESOLVE_CHUUNIN_EXAM'; choice: ChuuninExamChoice }
   | { type: 'RESOLVE_TOURNAMENT_ROUND'; choice: TournamentChoice }
+  | { type: 'RESOLVE_CIRCUIT_STOP'; choice: TournamentChoice }
+  | { type: 'ENTER_JOUNIN_FINALE' }
   | { type: 'CHOOSE_CAREER_PATH'; path: CareerPath }
   | { type: 'SEEK_PARDON' }
   | { type: 'SET_LOADOUT'; jutsuIds: string[] }

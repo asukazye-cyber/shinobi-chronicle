@@ -213,12 +213,25 @@ describe('career simulation', () => {
   it('uses circuit points to qualify eight finalists while reserving promotion for the final top four', () => {
     let s = genin(944);
     s = { ...s, stats: { ...s.stats, successes: 3 }, character: { ...s.character, reputation: 4, geninFieldMark: 'guardian' } };
-    expect(() => applyCommand(s, { type: 'PROMOTE' }, content)).toThrow('oito melhores');
-    s = { ...s, competitive: { ...s.competitive!, playerPoints: 18, playerCircuitWins: 6, scoredResults: 6 } };
+    expect(() => applyCommand(s, { type: 'PROMOTE' }, content)).toThrow('cinco etapas');
+    s = { ...s, competitive: { ...s.competitive!, playerPoints: 18, playerCircuitWins: 6, scoredResults: 5 } };
     s = applyCommand(s, { type: 'PROMOTE' }, content);
     expect(s.tournament?.qualifiers).toHaveLength(8);
     expect(s.tournament?.qualifiers).toContain(s.rival.name);
     expect(s.tournament?.entrants).toContain(s.rival.name);
+  });
+  it('scores only scheduled tournament bouts: Genin stays home while later ranks visit all five villages', () => {
+    let s = genin(945); s = { ...s, character: { ...s.character, geninFieldMark: 'guardian' } };
+    const geninStops = s.competitive!.stops!.Genin;
+    expect(geninStops).toHaveLength(5);
+    expect(new Set(geninStops.map(stop => stop.host))).toEqual(new Set([s.character.village]));
+    const first = geninStops[0], opponent = s.competitive!.rosters.Genin.find(entry => entry.id === first.opponentId)!;
+    s = applyCommand(s, { type: 'RESOLVE_CIRCUIT_STOP', choice: 'control' }, content);
+    expect(s.competitive!.stops!.Genin[0].completed).toBe(true);
+    expect(s.competitive!.scoredResults).toBe(1);
+    expect(s.chronicle.at(-1)?.text).toContain(opponent.name);
+    expect(new Set(s.competitive!.stops!.Chuunin.map(stop => stop.host))).toHaveLength(5);
+    expect(new Set(s.competitive!.stops!.Jounin.map(stop => stop.host))).toHaveLength(5);
   });
   it('lets a build cross-train disciplines and unlocks their technique branches without changing bloodline', () => {
     let s = genin(942); s = { ...s, stats: { ...s.stats, successes: 2 }, character: { ...s.character, specialization: 'tracker', disciplines: [], ryo: 180 } };
@@ -314,7 +327,7 @@ describe('career simulation', () => {
     let s = genin(717);
     s = { ...s, stats: { ...s.stats, successes: 2 } };
     s = applyCommand(s, { type: 'START_REGIONAL_CIRCUIT' }, content);
-    expect(s.regionalCircuit?.host).toBe('Vale das Pontes');
+    expect(s.regionalCircuit?.host).toBe(s.character.village);
     s = applyCommand(s, { type: 'RESOLVE_REGIONAL_CIRCUIT', choice: 'parley' }, content);
     expect(s.character.geninFieldMark).toBe('mediator');
     expect(s.world.councilTrust).toBe(1);
@@ -334,7 +347,7 @@ describe('career simulation', () => {
     s = { ...s, stats: { ...s.stats, successes: 8 }, competitive: { ...s.competitive!, playerPoints: 18, playerCircuitWins: 6, scoredResults: 6 }, character: { ...s.character, rank: 'Chuunin', reputation: 12, attributes: Object.fromEntries(Object.keys(s.character.attributes).map(key => [key, 10])) as typeof s.character.attributes, loadout: ['binding-wire', 'scouts-eye', 'stone-guard', 'mist-step'] } };
     s = applyCommand(s, { type: 'PROMOTE' }, content);
     expect(s.tournament?.kind).toBe('jounin');
-    expect(s.tournament?.host).toBe('Cúpula das Cinco Rotas');
+    expect(s.tournament?.host).not.toBe('Cúpula das Cinco Rotas');
     s = resolveTournament(s);
     expect(s.character.rank).toBe('Jounin');
     expect(s.character.loadout).toHaveLength(5);
